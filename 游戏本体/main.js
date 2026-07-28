@@ -234,6 +234,7 @@ const elements = {
   forgingSelectedResource: $("#forging-selected-resource"),
   smeltingCurrentInputs: $("#smelting-current-inputs"),
   forgingCurrentInputs: $("#forging-current-inputs"),
+  metallurgyLayout: $(".metallurgy-layout"),
   smeltingProduct: $("#smelting-product"),
   forgingProduct: $("#forging-product"),
   smeltButton: $("#smelt-button"),
@@ -344,6 +345,7 @@ const metallurgyUi = {
   bladeMetaScrollTop: 0,
   batchDeleteMode: false,
   batchDeleteBladeIds: new Set(),
+  pendingBladeDetails: null,
 };
 const settingsUi = {
   activeTab: "settings",
@@ -1341,6 +1343,7 @@ function completeMetallurgyOperation(station, operation) {
       state.battle.selectedBladeId = forgedBlade.id;
     }
     state.metallurgy.lastForgingProduct = createBladeProduct(forgedBlade);
+    metallurgyUi.pendingBladeDetails = forgedBlade;
   }
 
   addLog(`${getStationName(station)}完成：${formatResourceBundle(inputs)} -> ${formatProductResult(product)}`);
@@ -1475,6 +1478,11 @@ function trimDecimal(value) {
 function formatDuration(seconds) {
   const number = Math.max(0, Number(seconds) || 0);
   return `${number.toFixed(1)}s`;
+}
+
+function formatWholeDuration(seconds) {
+  const whole = Math.ceil(Math.max(0, Number(seconds) || 0));
+  return `${formatNumber(whole)}s`;
 }
 
 function formatMultiplier(value) {
@@ -2095,7 +2103,7 @@ function changeIngredient(station, action) {
   ensureSelectedMetallurgyResources();
 
   if (isActionCoolingDown(station)) {
-    addLog(`${getStationName(station)}正在冷却，无法调整投料。`);
+    addLog(`${getStationName(station)}正在工作，无法调整投料。`);
     render();
     return;
   }
@@ -2270,7 +2278,7 @@ function reproduceStationInputs(station, sourceInputs) {
   advancePassive();
 
   if (isActionCoolingDown(station)) {
-    addLog(`${getStationName(station)}正在冷却，无法再生产。`);
+    addLog(`${getStationName(station)}正在工作，无法再生产。`);
     render();
     return;
   }
@@ -2424,7 +2432,12 @@ function deleteSelectedBlade(context = "metallurgy") {
     return;
   }
   if (isBladeFavorite(selectedBlade)) {
-    window.alert("请先取消收藏");
+    const message = "请先取消收藏。";
+    addLog(message);
+    if (context === "battle") {
+      addBattleLog(message);
+    }
+    render();
     return;
   }
 
@@ -2569,15 +2582,27 @@ function renderResearchActiveControls(research, purchasedLevel, activeLevel) {
 }
 
 function renderAvailableResearch() {
-  const availableResearch = upgradeResearch.filter(
-    (research) => isResearchUnlocked(research) && getNextLevelData(research),
-  );
+  const availableResearch = upgradeResearch
+    .map((research, index) => {
+      const nextLevelData = getNextLevelData(research);
+      return {
+        research,
+        index,
+        nextLevelData,
+        affordable: Boolean(nextLevelData && canAfford(nextLevelData.cost)),
+      };
+    })
+    .filter(({ research, nextLevelData }) => isResearchUnlocked(research) && nextLevelData)
+    .sort((a, b) => {
+      if (a.affordable !== b.affordable) {
+        return a.affordable ? -1 : 1;
+      }
+      return a.index - b.index;
+    });
 
   elements.availableResearchList.replaceChildren(
-    ...availableResearch.map((research) => {
+    ...availableResearch.map(({ research, nextLevelData, affordable }) => {
       const level = getResearchLevel(research.id);
-      const nextLevelData = getNextLevelData(research);
-      const affordable = canAfford(nextLevelData.cost);
       const card = document.createElement("article");
       card.className = "research-card upgrade-research-card";
       card.innerHTML = `
@@ -2769,42 +2794,79 @@ function renderStats() {
   }
 
   const scrollTop = elements.statsList.scrollTop;
-  const resourceRows = resourceIds.map((resource) => [
-    resourceLabels[resource],
-    `${formatNumber(state.resources[resource])} / 历史 ${formatNumber(state.highestResources[resource])}`,
+  const statCards = [];
+  const addStatCard = (title, rows) => {
+    const visibleRows = rows.filter(Boolean);
+    if (visibleRows.length) {
+      statCards.push(createStatCard(title, visibleRows));
+    }
+  };
+
+  addStatCard(
+    "资源",
+    resourceIds
+      .filter((resource) => Math.floor(getHighestResourceAmount(resource)) > 0)
+      .map((resource) => {
+        const currentAmount = Math.max(0, Math.floor(Number(state.resources[resource]) || 0));
+        const highestAmount = Math.floor(getHighestResourceAmount(resource));
+        return [
+          resourceLabels[resource],
+          currentAmount > 0
+            ? `${formatNumber(currentAmount)} / 历史 ${formatNumber(highestAmount)}`
+            : `历史 ${formatNumber(highestAmount)}`,
+        ];
+      }),
+  );
+
+  const ownedResearchCount = getOwnedResearchCount();
+  const unlockedResearchCount = getUnlockedResearchCount();
+  const researchLevelTotal = getAllResearchLevelTotal();
+  const unlockedFeatureText = getUnlockedFeatureText();
+  addStatCard("研究", [
+    ownedResearchCount > 0 ? ["已持有研究", formatNumber(ownedResearchCount)] : null,
+    unlockedResearchCount > 0 ? ["已解锁研究", formatNumber(unlockedResearchCount)] : null,
+    researchLevelTotal > 0 ? ["研究等级合计", formatNumber(researchLevelTotal)] : null,
+    unlockedFeatureText !== "无" ? ["已解锁功能", unlockedFeatureText] : null,
   ]);
 
-  elements.statsList.replaceChildren(
-    createStatCard("资源", resourceRows),
-    createStatCard("研究", [
-      ["已持有研究", `${formatNumber(getOwnedResearchCount())} / ${formatNumber(allResearch.length)}`],
-      ["已解锁研究", `${formatNumber(getUnlockedResearchCount())} / ${formatNumber(allResearch.length)}`],
-      ["研究等级合计", formatNumber(getAllResearchLevelTotal())],
-      ["已解锁功能", getUnlockedFeatureText()],
-    ]),
-    createStatCard("冶金", [
-      ["垃圾", formatNumber(state.metallurgy.garbageCount)],
-      ["历史锻造刃", formatNumber(state.meta.forgedBladeTotal)],
-      ["冶炼记录", `${formatNumber(state.metallurgy.smeltingLog.length)} / ${formatNumber(SMELTING_LOG_LIMIT)}`],
-      [
-        "收藏记录",
-        `${formatNumber(state.metallurgy.smeltingFavorites.length)} / ${formatNumber(SMELTING_FAVORITE_LIMIT)}`,
-      ],
-      ["背包", `${formatNumber(state.metallurgy.bladeInventory.length)} / ${formatNumber(BLADE_INVENTORY_LIMIT)}`],
-    ]),
-    createStatCard("战斗", [
-      ["已解锁 CR", `CR${formatNumber(state.battle.maxUnlockedCr)}`],
-      ["战斗获得盐", formatNumber(state.battle.saltEarned)],
-      ["攻击", formatNumber(state.battle.attacks)],
-      ["磨刃", formatNumber(state.battle.hones)],
-    ]),
-    createStatCard("系统", [
-      ["主页记录", `${formatNumber(state.homeLog.length)} / ${formatNumber(HOME_LOG_LIMIT)}`],
-      ["游戏版本", `v${GAME_VERSION}`],
-      ["存档结构", `v${formatNumber(SAVE_VERSION)}`],
-      ["最近保存", formatSavedAt(state.lastSavedAt)],
-    ]),
-  );
+  if (state.unlockedFeatures.metallurgy) {
+    const smeltingLogCount = state.metallurgy.smeltingLog.length;
+    const smeltingFavoriteCount = state.metallurgy.smeltingFavorites.length;
+    const bladeInventoryCount = state.metallurgy.bladeInventory.length;
+    addStatCard("冶金", [
+      state.metallurgy.garbageCount > 0 ? ["垃圾", formatNumber(state.metallurgy.garbageCount)] : null,
+      state.meta.forgedBladeTotal > 0 ? ["历史锻造刃", formatNumber(state.meta.forgedBladeTotal)] : null,
+      smeltingLogCount > 0
+        ? ["冶炼记录", `${formatNumber(smeltingLogCount)} / ${formatNumber(SMELTING_LOG_LIMIT)}`]
+        : null,
+      smeltingFavoriteCount > 0
+        ? ["收藏记录", `${formatNumber(smeltingFavoriteCount)} / ${formatNumber(SMELTING_FAVORITE_LIMIT)}`]
+        : null,
+      bladeInventoryCount > 0
+        ? ["背包", `${formatNumber(bladeInventoryCount)} / ${formatNumber(BLADE_INVENTORY_LIMIT)}`]
+        : null,
+    ]);
+  }
+
+  if (state.unlockedFeatures.battle) {
+    const battleKillTotal = getBattleKillTotal();
+    addStatCard("战斗", [
+      state.battle.maxUnlockedCr > 0 ? ["已解锁 CR", `CR${formatNumber(state.battle.maxUnlockedCr)}`] : null,
+      battleKillTotal > 0 ? ["击败敌人", formatNumber(battleKillTotal)] : null,
+      state.battle.saltEarned > 0 ? ["战斗获得盐", formatNumber(state.battle.saltEarned)] : null,
+      state.battle.attacks > 0 ? ["攻击", formatNumber(state.battle.attacks)] : null,
+      state.battle.hones > 0 ? ["磨刃", formatNumber(state.battle.hones)] : null,
+    ]);
+  }
+
+  addStatCard("系统", [
+    state.homeLog.length > 0 ? ["主页记录", `${formatNumber(state.homeLog.length)} / ${formatNumber(HOME_LOG_LIMIT)}`] : null,
+    ["游戏版本", `v${GAME_VERSION}`],
+    ["存档结构", `v${formatNumber(SAVE_VERSION)}`],
+    ["最近保存", formatSavedAt(state.lastSavedAt)],
+  ]);
+
+  elements.statsList.replaceChildren(...statCards);
   elements.statsList.scrollTop = scrollTop;
 }
 
@@ -3227,23 +3289,10 @@ function renderBattleButtons() {
 
   if (elements.battleFleeButton) {
     elements.battleFleeButton.disabled = !battleUnlocked || fleeRemaining > 0;
-    elements.battleFleeButton.textContent = fleeRemaining > 0 ? `逃跑 ${formatDuration(fleeRemaining)}` : "逃跑";
+    elements.battleFleeButton.textContent = fleeRemaining > 0 ? `逃跑 ${formatWholeDuration(fleeRemaining)}` : "逃跑";
   }
 
-  if (elements.battleCrSelect) {
-    elements.battleCrSelect.disabled = !battleUnlocked;
-    Array.from(elements.battleCrSelect.options).forEach((option) => {
-      const cr = Number(option.value);
-      const shouldDisable = !Number.isFinite(cr) || cr > state.battle.maxUnlockedCr;
-      if (option.disabled !== shouldDisable) {
-        option.disabled = shouldDisable;
-      }
-    });
-    const selectedCrValue = String(state.battle.selectedCr);
-    if (document.activeElement !== elements.battleCrSelect && elements.battleCrSelect.value !== selectedCrValue) {
-      elements.battleCrSelect.value = selectedCrValue;
-    }
-  }
+  renderBattleCrSelect(battleUnlocked);
 
   if (elements.battleAutoToggle) {
     elements.battleAutoToggle.disabled = !canUseBlade;
@@ -3278,6 +3327,41 @@ function renderBattleButtons() {
     elements.battleInscriptionButton.setAttribute("aria-hidden", String(!inscriptionUnlocked));
     elements.battleInscriptionButton.disabled = !canUseInscription;
     elements.battleInscriptionButton.classList.toggle("is-active", canUseInscription);
+  }
+}
+
+function renderBattleCrSelect(battleUnlocked = Boolean(state.unlockedFeatures.battle)) {
+  if (!elements.battleCrSelect) {
+    return;
+  }
+
+  const maxVisibleCr = battleUnlocked ? clampBattleCr(state.battle.maxUnlockedCr, 1) : 1;
+  const visibleValues = Array.from({ length: maxVisibleCr }, (_, index) => String(index + 1));
+  const currentValues = Array.from(elements.battleCrSelect.options).map((option) => option.value);
+  const needsRebuild =
+    currentValues.length !== visibleValues.length ||
+    currentValues.some((value, index) => value !== visibleValues[index]);
+
+  if (needsRebuild) {
+    elements.battleCrSelect.replaceChildren(
+      ...visibleValues.map((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = `CR${value}`;
+        return option;
+      }),
+    );
+  }
+
+  const selectedCr = Math.min(maxVisibleCr, clampBattleCr(state.battle.selectedCr, 1));
+  if (state.battle.selectedCr !== selectedCr) {
+    state.battle.selectedCr = selectedCr;
+  }
+
+  elements.battleCrSelect.disabled = !battleUnlocked;
+  const selectedCrValue = String(selectedCr);
+  if (document.activeElement !== elements.battleCrSelect && elements.battleCrSelect.value !== selectedCrValue) {
+    elements.battleCrSelect.value = selectedCrValue;
   }
 }
 
@@ -3748,14 +3832,10 @@ function renderIngredientStation(station) {
 
 function renderCurrentLoadout(element, inputs, inputTotal, inputLimit) {
   const bundle = document.createElement("span");
-  bundle.textContent = formatResourceBundle(inputs);
+  bundle.className = inputTotal >= inputLimit ? "loadout-limit is-full" : "loadout-limit";
+  bundle.textContent = `${formatResourceBundle(inputs)} · 总投料 ${formatNumber(inputTotal)} / 上限 ${formatNumber(inputLimit)}`;
 
-  const limit = document.createElement("small");
-  limit.className = "loadout-limit";
-  limit.classList.toggle("is-full", inputTotal >= inputLimit);
-  limit.textContent = `总投料 ${formatNumber(inputTotal)} / 上限 ${formatNumber(inputLimit)}`;
-
-  element.replaceChildren(bundle, limit);
+  element.replaceChildren(bundle);
 }
 
 function renderMetalResourcePanels() {
@@ -3843,7 +3923,7 @@ function createEmptyNote(text) {
 
 function renderMetallurgyProducts() {
   renderStationProduct("smelting", elements.smeltingProduct, state.metallurgy.lastSmeltingProduct, "尚未冶炼", "投入资源后确认。");
-  renderStationProduct("forging", elements.forgingProduct, state.metallurgy.lastForgingProduct, "尚未锻造", "刃属性会显示在这里。");
+  renderStationProduct("forging", elements.forgingProduct, state.metallurgy.lastForgingProduct, "尚未锻造", "投料后确认。");
 }
 
 function renderStationProduct(station, element, product, emptyTitle, emptyDetail) {
@@ -3860,11 +3940,10 @@ function renderStationProduct(station, element, product, emptyTitle, emptyDetail
 
 function renderPendingProduct(element, station, operation, remainingSeconds) {
   const title = document.createElement("span");
-  const detail = document.createElement("small");
 
-  title.textContent = `${getStationName(station)}中`;
-  detail.textContent = `${formatResourceBundle(operation.inputs)}，剩余 ${formatDuration(remainingSeconds)}`;
-  element.replaceChildren(title, detail);
+  title.textContent = `${getStationName(station)}中：${formatResourceBundle(operation.inputs)}，剩余 ${formatDuration(remainingSeconds)}`;
+  title.title = title.textContent;
+  element.replaceChildren(title);
 }
 
 function renderProduct(element, product, emptyTitle, emptyDetail) {
@@ -3872,25 +3951,73 @@ function renderProduct(element, product, emptyTitle, emptyDetail) {
   const detail = document.createElement("small");
 
   if (!product) {
-    title.textContent = emptyTitle;
-    detail.textContent = emptyDetail;
+    title.textContent = `${emptyTitle}：${emptyDetail}`;
   } else if (product.type === "resource") {
-    title.textContent = formatProductResult(product);
-    detail.textContent = product.message || "冶炼成功。";
+    title.textContent = `${formatProductResult(product)}：${product.message || "冶炼成功。"}`;
   } else if (product.type === "notice") {
-    title.textContent = product.name || "未反应";
-    detail.textContent = product.message || "没有发生变化。";
+    title.textContent = `${product.name || "未反应"}：${product.message || "没有发生变化。"}`;
   } else if (product.type === "blade") {
     title.textContent = product.name || "刃";
-    detail.textContent = product.message || "已收入背包。";
-    element.replaceChildren(title, createBladeStatList(product), detail);
+    title.title = buildBladeDetailsText(product);
+    element.replaceChildren(title);
     return;
   } else {
-    title.textContent = "垃圾";
-    detail.textContent = product.message || "没有属性，不进入资源或背包。";
+    title.textContent = `垃圾：${product.message || "没有属性，不进入资源或背包。"}`;
   }
 
-  element.replaceChildren(title, detail);
+  title.title = title.textContent;
+  element.replaceChildren(title);
+}
+
+function maybeShowForgedBladeDetails() {
+  elements.metallurgyLayout?.querySelector(".metallurgy-result-popover")?.remove();
+
+  const blade = metallurgyUi.pendingBladeDetails;
+  if (!blade || !elements.metallurgyLayout) {
+    return;
+  }
+
+  elements.metallurgyLayout.append(createForgingResultPopover(blade));
+}
+
+function closeForgingResultPopover() {
+  metallurgyUi.pendingBladeDetails = null;
+  maybeShowForgedBladeDetails();
+}
+
+function createForgingResultPopover(blade) {
+  const panel = document.createElement("section");
+  panel.className = "metallurgy-result-popover";
+  panel.setAttribute("aria-label", "锻造结果");
+
+  const head = document.createElement("div");
+  head.className = "battle-info-popover-head";
+  const heading = document.createElement("strong");
+  heading.textContent = "锻造完成";
+  const closeButton = document.createElement("button");
+  closeButton.className = "battle-info-close";
+  closeButton.type = "button";
+  closeButton.dataset.forgingResultClose = "true";
+  closeButton.textContent = "×";
+  closeButton.setAttribute("aria-label", "关闭锻造结果");
+  head.append(heading, closeButton);
+
+  const title = document.createElement("div");
+  title.className = "blade-detail-title metallurgy-result-title";
+  const name = document.createElement("strong");
+  name.textContent = blade.name;
+  const status = document.createElement("small");
+  const usable = isBladeUsable(blade);
+  status.textContent = usable ? "可用" : "该刃不可用";
+  status.classList.toggle("is-unusable", !usable);
+  title.append(name, status);
+
+  const body = document.createElement("div");
+  body.className = "blade-detail-body metallurgy-result-body";
+  body.append(createBladeDetailStats(blade));
+
+  panel.append(head, title, body, createBladeMetaPanel(blade));
+  return panel;
 }
 
 function renderMetallurgyProcessButtons() {
@@ -3913,7 +4040,7 @@ function renderMetallurgyProcessButton(station, button) {
   if (isFull) {
     label.textContent = "背包已满";
   } else if (remainingSeconds > 0) {
-    label.textContent = `冷却 ${formatDuration(remainingSeconds)}`;
+    label.textContent = `工作中 ${formatWholeDuration(remainingSeconds)}`;
   } else {
     const actionLabel = PROCESS_ACTION_LABELS[station] || getStationName(station);
     label.textContent = operationSeconds > 0 ? `${actionLabel} ${formatDuration(operationSeconds)}` : actionLabel;
@@ -4408,6 +4535,7 @@ function render() {
   renderSettingsTabs();
   renderStats();
   renderMilestones();
+  maybeShowForgedBladeDetails();
 }
 
 function renderActionCooldownState() {
@@ -4721,6 +4849,14 @@ function bindEvents() {
       setMetallurgyStation(button.dataset.metallurgyTab);
     });
   });
+  if (elements.metallurgyLayout) {
+    elements.metallurgyLayout.addEventListener("click", (event) => {
+      if (!event.target.closest("[data-forging-result-close]")) {
+        return;
+      }
+      closeForgingResultPopover();
+    });
+  }
   if (elements.inscriptionPanel) {
     elements.inscriptionPanel.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-inscription-epilogue-accept]");
