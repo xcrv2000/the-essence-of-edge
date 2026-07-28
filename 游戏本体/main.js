@@ -236,7 +236,9 @@ const elements = {
   forgingCurrentInputs: $("#forging-current-inputs"),
   metallurgyLayout: $(".metallurgy-layout"),
   smeltingProduct: $("#smelting-product"),
+  smeltingProductNote: $("#smelting-product-note"),
   forgingProduct: $("#forging-product"),
+  forgingProductNote: $("#forging-product-note"),
   smeltButton: $("#smelt-button"),
   forgeButton: $("#forge-button"),
   smeltingDrawer: $("#smelting-drawer"),
@@ -3812,18 +3814,16 @@ function renderIngredientStation(station) {
 
       const label = document.createElement("strong");
       label.textContent = resourceLabels[resource];
-      const amount = document.createElement("small");
-      amount.textContent = `持有 ${formatNumber(state.resources[resource])}`;
       const planned = document.createElement("span");
       planned.textContent = `投入 ${formatNumber(inputs[resource])}`;
 
-      button.append(label, amount, planned);
+      button.append(label, planned);
       return button;
     }),
   );
 
   if (selectedResource) {
-    selectedElement.textContent = `${resourceLabels[selectedResource]} 已投 ${formatNumber(inputs[selectedResource])} / 步长 ${formatNumber(step)}`;
+    selectedElement.textContent = `已投 ${formatNumber(inputs[selectedResource])} / 步长 ${formatNumber(step)}`;
   } else {
     selectedElement.textContent = `未选择 / 步长 ${formatNumber(step)}`;
   }
@@ -3922,51 +3922,85 @@ function createEmptyNote(text) {
 }
 
 function renderMetallurgyProducts() {
-  renderStationProduct("smelting", elements.smeltingProduct, state.metallurgy.lastSmeltingProduct, "尚未冶炼", "投入资源后确认。");
-  renderStationProduct("forging", elements.forgingProduct, state.metallurgy.lastForgingProduct, "尚未锻造", "投料后确认。");
+  renderStationProduct(
+    "smelting",
+    elements.smeltingProduct,
+    elements.smeltingProductNote,
+    state.metallurgy.lastSmeltingProduct,
+    "尚未冶炼",
+    "投入资源后确认。",
+  );
+  renderStationProduct(
+    "forging",
+    elements.forgingProduct,
+    elements.forgingProductNote,
+    state.metallurgy.lastForgingProduct,
+    "尚未锻造",
+    "投料后确认。",
+  );
 }
 
-function renderStationProduct(station, element, product, emptyTitle, emptyDetail) {
+function renderStationProduct(station, element, noteElement, product, emptyTitle, emptyDetail) {
   const pendingOperation = getPendingOperation(station);
   const remainingSeconds = getCooldownRemainingSeconds(station);
 
   if (pendingOperation && remainingSeconds > 0) {
-    renderPendingProduct(element, station, pendingOperation, remainingSeconds);
+    renderPendingProduct(element, noteElement, station, pendingOperation, remainingSeconds);
     return;
   }
 
-  renderProduct(element, product, emptyTitle, emptyDetail);
+  renderProduct(element, noteElement, product, emptyTitle, emptyDetail);
 }
 
-function renderPendingProduct(element, station, operation, remainingSeconds) {
+function renderPendingProduct(element, noteElement, station, operation, remainingSeconds) {
   const title = document.createElement("span");
+  const note = `${formatResourceBundle(operation.inputs)}，剩余 ${formatWholeDuration(remainingSeconds)}`;
 
-  title.textContent = `${getStationName(station)}中：${formatResourceBundle(operation.inputs)}，剩余 ${formatDuration(remainingSeconds)}`;
-  title.title = title.textContent;
+  title.textContent = `${getStationName(station)}中`;
+  title.title = `${title.textContent}：${note}`;
+  renderProductNote(noteElement, note);
   element.replaceChildren(title);
 }
 
-function renderProduct(element, product, emptyTitle, emptyDetail) {
+function renderProduct(element, noteElement, product, emptyTitle, emptyDetail) {
   const title = document.createElement("span");
-  const detail = document.createElement("small");
+  let note = emptyDetail;
 
   if (!product) {
-    title.textContent = `${emptyTitle}：${emptyDetail}`;
+    title.textContent = emptyTitle;
   } else if (product.type === "resource") {
-    title.textContent = `${formatProductResult(product)}：${product.message || "冶炼成功。"}`;
+    const result = formatProductResult(product);
+    const message = product.message || "冶炼成功。";
+    title.textContent = result;
+    note = `${result}：${message}`;
   } else if (product.type === "notice") {
-    title.textContent = `${product.name || "未反应"}：${product.message || "没有发生变化。"}`;
+    const name = product.name || "未反应";
+    const message = product.message || "没有发生变化。";
+    title.textContent = name;
+    note = `${name}：${message}`;
   } else if (product.type === "blade") {
     title.textContent = product.name || "刃";
     title.title = buildBladeDetailsText(product);
+    renderProductNote(noteElement, "已收入背包。");
     element.replaceChildren(title);
     return;
   } else {
-    title.textContent = `垃圾：${product.message || "没有属性，不进入资源或背包。"}`;
+    const message = product.message || "没有属性，不进入资源或背包。";
+    title.textContent = "垃圾";
+    note = `垃圾：${message}`;
   }
 
   title.title = title.textContent;
+  renderProductNote(noteElement, note);
   element.replaceChildren(title);
+}
+
+function renderProductNote(noteElement, text) {
+  if (!noteElement) {
+    return;
+  }
+  noteElement.textContent = text || "";
+  noteElement.title = noteElement.textContent;
 }
 
 function maybeShowForgedBladeDetails() {
@@ -4081,9 +4115,10 @@ function createBladeDetailStats(blade) {
   return list;
 }
 
-function createBladeRadarChart(blade) {
+function createBladeRadarChart(blade, options = {}) {
   const wrapper = document.createElement("div");
   wrapper.className = "blade-radar";
+  const showLabels = options.labels !== false;
 
   const svg = createSvgElement("svg", {
     viewBox: "0 0 160 160",
@@ -4156,9 +4191,11 @@ function createBladeRadarChart(blade) {
     );
   });
 
-  bladeStatIds.forEach((stat, index) => {
-    svg.append(createBladeRadarLabel(blade, stat, index, bladeStatIds.length, labelRadius, center));
-  });
+  if (showLabels) {
+    bladeStatIds.forEach((stat, index) => {
+      svg.append(createBladeRadarLabel(blade, stat, index, bladeStatIds.length, labelRadius, center));
+    });
+  }
 
   wrapper.append(svg);
   return wrapper;
@@ -4402,7 +4439,7 @@ function renderBladeInventory() {
 
   const body = document.createElement("div");
   body.className = "blade-detail-body";
-  body.append(createBladeDetailStats(selectedBlade), createBladeRadarChart(selectedBlade));
+  body.append(createBladeDetailStats(selectedBlade), createBladeRadarChart(selectedBlade, { labels: false }));
 
   elements.bladeDetail.replaceChildren(title, body, createBladeMetaPanel(selectedBlade));
   restoreBladeMetaScroll();
