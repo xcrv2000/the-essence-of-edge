@@ -4048,7 +4048,7 @@ function createForgingResultPopover(blade) {
 
   const body = document.createElement("div");
   body.className = "blade-detail-body metallurgy-result-body";
-  body.append(createBladeDetailStats(blade));
+  body.append(createBladeDetailStats(blade), createBladeRadarChart(blade, { labels: false }));
 
   panel.append(head, title, body, createBladeMetaPanel(blade));
   return panel;

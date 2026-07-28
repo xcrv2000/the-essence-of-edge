@@ -562,13 +562,16 @@ h3 {
 }
 
 .metallurgy-result-popover .metallurgy-result-body {
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
 }
 
 .metallurgy-result-popover .blade-detail-stats {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-self: start;
-  gap: 4px 8px;
+  width: min(100%, 360px);
+  grid-template-columns: repeat(2, max-content);
+  justify-content: center;
+  align-self: center;
+  gap: 4px clamp(16px, 8vw, 36px);
 }
 
 .metallurgy-result-popover .blade-detail-stat-row {
@@ -585,6 +588,35 @@ h3 {
 .metallurgy-result-popover .blade-detail-stat-row strong {
   justify-self: start;
   overflow-wrap: normal;
+}
+
+.metallurgy-result-popover .blade-radar {
+  display: none;
+}
+
+@media (min-width: 560px) and (min-height: 640px) {
+  .metallurgy-result-popover .metallurgy-result-body {
+    grid-template-columns: minmax(0, max-content) minmax(120px, 160px);
+    align-items: center;
+    justify-content: center;
+    justify-items: stretch;
+    gap: 14px;
+  }
+
+  .metallurgy-result-popover .blade-detail-stats {
+    width: auto;
+    grid-template-columns: max-content;
+    justify-content: start;
+    align-self: center;
+    gap: 5px;
+  }
+
+  .metallurgy-result-popover .blade-radar {
+    width: min(100%, 160px, 28vh);
+    max-width: none;
+    display: block;
+    justify-self: center;
+  }
 }
 
 .metallurgy-result-popover .blade-meta-panel {
@@ -1609,6 +1641,16 @@ h3 {
   pointer-events: none;
 }
 
+.metallurgy-station[data-station="forging"] .blade-detail-body {
+  align-items: start;
+}
+
+.metallurgy-station[data-station="forging"] .blade-radar {
+  width: clamp(72px, 20vw, 150px);
+  max-width: 100%;
+  align-self: start;
+}
+
 .blade-radar-grid {
   fill: none;
   stroke: var(--line);
@@ -2349,8 +2391,9 @@ textarea::placeholder {
   }
 
   .metallurgy-station[data-station="forging"] .blade-detail {
-    grid-template-rows: auto minmax(0, 1fr);
-    gap: 5px;
+    grid-template-rows: auto auto;
+    align-content: start;
+    gap: 3px;
     overflow: hidden;
   }
 
@@ -2366,8 +2409,9 @@ textarea::placeholder {
   }
 
   .metallurgy-station[data-station="forging"] .blade-detail-body {
-    grid-template-columns: minmax(0, 1fr) 74px;
-    gap: 6px;
+    grid-template-columns: minmax(0, 1fr) clamp(54px, 12vh, 86px);
+    align-items: start;
+    gap: 4px;
   }
 
   .metallurgy-station[data-station="forging"] .blade-detail-stats {
@@ -2383,7 +2427,8 @@ textarea::placeholder {
   }
 
   .metallurgy-station[data-station="forging"] .blade-radar {
-    max-width: 74px;
+    width: clamp(54px, 12vh, 86px);
+    max-width: none;
   }
 
   .metallurgy-station[data-station="forging"] .blade-meta-panel {
