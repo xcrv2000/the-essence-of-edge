@@ -15,6 +15,11 @@ const SMELTING_OPERATION_DURATION_FACTOR = 35;
 const FORGING_OPERATION_DURATION_FACTOR = 35;
 const OPERATION_DURATION_DIVISOR = 14;
 const DEFAULT_SULFUR_MINE_COOLDOWN_SECONDS = 1;
+const EARLY_SMELTING_TARGET_BASE_SECONDS = 5;
+const EARLY_SMELTING_TARGET_BONUS_SECONDS = 17.7;
+const EARLY_SMELTING_TARGET_CURVE_OFFSET = 0.18;
+const EARLY_SMELTING_ORIGINAL_BLEND_AMOUNT = 160;
+const EARLY_SMELTING_ORIGINAL_BLEND_POWER = 8;
 const BLADE_NAME_ROLL_ATTEMPTS = 24;
 const BLADE_NAME_VARIANTS = ["新月", "残星", "寒光", "鸣砂", "灰烬", "晨霜", "玄纹", "幽辉", "回火", "白隙"];
 const BATTLE_ATTRIBUTE_NOTES = [
@@ -1746,13 +1751,53 @@ function calculateOperationDurationSeconds(totalAmount, factor) {
   return factor * Math.log(1 + amount / OPERATION_DURATION_DIVISOR);
 }
 
+function calculateEarlySmeltingTargetDurationSeconds(totalAmount) {
+  const amount = Math.max(0, Math.floor(Number(totalAmount) || 0));
+  if (amount <= 0) {
+    return 0;
+  }
+
+  const normalizedAmount = amount / 100;
+  const curve = normalizedAmount * normalizedAmount;
+  return (
+    EARLY_SMELTING_TARGET_BASE_SECONDS +
+    EARLY_SMELTING_TARGET_BONUS_SECONDS * (curve / (curve + EARLY_SMELTING_TARGET_CURVE_OFFSET))
+  );
+}
+
+function calculateOriginalSmeltingDurationInfluence(totalAmount) {
+  const amount = Math.max(0, Math.floor(Number(totalAmount) || 0));
+  if (amount <= 0) {
+    return 0;
+  }
+
+  const blend = Math.pow(
+    amount / EARLY_SMELTING_ORIGINAL_BLEND_AMOUNT,
+    EARLY_SMELTING_ORIGINAL_BLEND_POWER,
+  );
+  return blend / (1 + blend);
+}
+
+function calculateSmeltingOperationDurationSeconds(totalAmount, factor) {
+  const amount = Math.max(0, Math.floor(Number(totalAmount) || 0));
+  if (amount <= 0) {
+    return 0;
+  }
+
+  const originalDuration = calculateOperationDurationSeconds(amount, factor);
+  const earlyTargetDuration = calculateEarlySmeltingTargetDurationSeconds(amount);
+  const originalInfluence = calculateOriginalSmeltingDurationInfluence(amount);
+  return earlyTargetDuration * (1 - originalInfluence) + originalDuration * originalInfluence;
+}
+
 function getOperationDurationSecondsForInputs(station, inputs) {
   const factor = station === "forging" ? FORGING_OPERATION_DURATION_FACTOR : SMELTING_OPERATION_DURATION_FACTOR;
-  const baseDuration = calculateOperationDurationSeconds(
-    getResourceAmountTotal(inputs, getAllowedMetallurgyResources(station)),
-    factor,
-  );
-  return baseDuration * getStationDurationMultiplier(station);
+  const totalAmount = getResourceAmountTotal(inputs, getAllowedMetallurgyResources(station));
+  const adjustedDuration =
+    station === "smelting"
+      ? calculateSmeltingOperationDurationSeconds(totalAmount, factor)
+      : calculateOperationDurationSeconds(totalAmount, factor);
+  return adjustedDuration * getStationDurationMultiplier(station);
 }
 
 function getStationOperationDurationSeconds(station) {
