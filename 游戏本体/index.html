@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#000000" />
+    <title>刃的本质</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell" id="app">
+      <header class="title-bar">
+        <div class="title-copy">
+          <p>刃的本质</p>
+          <h1 id="screen-title">主页</h1>
+        </div>
+        <div class="title-actions">
+          <div class="title-stats" aria-label="核心资源">
+            <span><strong id="title-mercury">0</strong><small>汞</small></span>
+            <span><strong id="title-sulfur">0</strong><small>硫</small></span>
+            <span><strong id="title-salt">0</strong><small>盐</small></span>
+          </div>
+          <button
+            class="settings-shortcut"
+            type="button"
+            data-target="settings"
+            aria-label="系统"
+            aria-selected="false"
+          >
+            <span aria-hidden="true">⚙</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="screen-stage" aria-live="polite">
+        <section class="screen is-active is-headless" data-screen="home" aria-label="主页">
+          <div class="home-layout">
+            <section class="metal-resource-panel" aria-label="金属资源">
+              <div class="metal-resource-head">
+                <strong>金属</strong>
+                <small>资源</small>
+              </div>
+              <div class="metal-resource-list" id="home-metal-resources"></div>
+            </section>
+
+            <section class="life-panel" aria-label="主角状态">
+              <div class="life-core" aria-hidden="true"></div>
+              <div>
+                <span>主角</span>
+                <strong>一团水银形的不定形生命</strong>
+              </div>
+            </section>
+
+            <div class="resource-grid" aria-label="资源">
+              <article class="resource-card">
+                <span>汞</span>
+                <strong id="home-mercury">0</strong>
+                <small id="mercury-rate">+1 / 秒</small>
+              </article>
+              <article class="resource-card">
+                <span>硫</span>
+                <strong id="home-sulfur">0</strong>
+                <small id="sulfur-rate">手动开采</small>
+              </article>
+              <article class="resource-card">
+                <span>盐</span>
+                <strong id="home-salt">0</strong>
+                <small id="salt-rate">战斗获得</small>
+              </article>
+            </div>
+
+            <button class="primary-action" id="sulfur-button" type="button">
+              <span>硫矿床</span>
+              <strong id="sulfur-gain">+1 硫</strong>
+            </button>
+
+            <ol class="event-log" id="home-log" aria-label="主页记录"></ol>
+          </div>
+        </section>
+
+        <section class="screen is-headless" data-screen="research" aria-label="研究">
+          <div class="research-layout">
+            <section class="research-section" data-research-section="available">
+              <div class="research-section-head">
+                <h3>可研究</h3>
+                <button
+                  class="research-section-toggle"
+                  type="button"
+                  aria-expanded="true"
+                  aria-controls="available-research-list"
+                  data-section-toggle="available"
+                >
+                  <span aria-hidden="true">▴</span>
+                  <small>折叠</small>
+                </button>
+              </div>
+              <div class="research-list" id="available-research-list" aria-label="可研究项目"></div>
+            </section>
+
+            <section class="research-section" data-research-section="owned">
+              <div class="research-section-head">
+                <h3>已持有</h3>
+                <button
+                  class="research-section-toggle"
+                  type="button"
+                  aria-expanded="true"
+                  aria-controls="owned-research-list"
+                  data-section-toggle="owned"
+                >
+                  <span aria-hidden="true">▴</span>
+                  <small>折叠</small>
+                </button>
+              </div>
+              <div class="research-list" id="owned-research-list" aria-label="已持有研究"></div>
+            </section>
+
+            <section class="research-section" data-research-section="locked">
+              <div class="research-section-head">
+                <h3>未解锁</h3>
+                <button
+                  class="research-section-toggle"
+                  type="button"
+                  aria-expanded="true"
+                  aria-controls="locked-feature-list"
+                  data-section-toggle="locked"
+                >
+                  <span aria-hidden="true">▴</span>
+                  <small>折叠</small>
+                </button>
+              </div>
+              <div class="research-list" id="locked-research-list" aria-label="未解锁研究"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="screen is-headless" data-screen="metallurgy" aria-label="冶金">
+          <div class="metallurgy-layout">
+            <section class="metal-resource-panel metallurgy-metal-panel" aria-label="冶金金属资源">
+              <div class="metal-resource-head">
+                <strong>金属</strong>
+                <small>资源</small>
+              </div>
+              <div class="metal-resource-list" id="metallurgy-metal-resources"></div>
+            </section>
+
+            <div class="metallurgy-panels">
+              <section class="metallurgy-station is-active" data-station="smelting" data-metallurgy-panel="smelting" aria-labelledby="smelting-title">
+                <div class="station-title">
+                  <div>
+                    <h3 id="smelting-title">冶炼</h3>
+                    <small>也不算是冶炼，毕竟没开火。</small>
+                  </div>
+                </div>
+
+                <div class="station-workbench">
+                  <section class="station-column ingredient-column" aria-label="冶炼投料">
+                    <strong>投料</strong>
+                    <div class="ingredient-list" id="smelting-resource-list"></div>
+                    <div class="ingredient-controls">
+                      <button class="secondary-action" type="button" data-ingredient-action="divide" data-station="smelting">/10</button>
+                      <span id="smelting-selected-resource">未选择</span>
+                      <button class="secondary-action" type="button" data-ingredient-action="multiply" data-station="smelting">*10</button>
+                      <button class="secondary-action" type="button" data-ingredient-action="remove" data-station="smelting">-1</button>
+                      <button class="secondary-action" type="button" data-ingredient-action="add" data-station="smelting">+1</button>
+                    </div>
+                  </section>
+
+                  <section class="station-column product-column" aria-label="冶炼产品">
+                    <strong>产品</strong>
+                    <div class="product-display" id="smelting-product">
+                      <span>尚未冶炼</span>
+                      <small>投入资源后确认。</small>
+                    </div>
+                    <div class="current-loadout" id="smelting-current-inputs">未投料</div>
+                  </section>
+
+                  <section class="station-column process-column" aria-label="冶炼确认">
+                    <button class="process-button cauldron-button" id="smelt-button" type="button">
+                      <span class="process-icon" aria-hidden="true">坩</span>
+                      <strong>冶炼</strong>
+                    </button>
+                  </section>
+
+                  <aside class="metallurgy-drawer" id="smelting-drawer" aria-label="冶炼记录抽屉">
+                    <button class="drawer-toggle" id="smelting-drawer-toggle" type="button" aria-expanded="false">
+                      <span aria-hidden="true">‹</span>
+                      <small>记录</small>
+                    </button>
+                    <div class="drawer-body">
+                      <div class="drawer-head">
+                        <strong id="smelting-log-title">完整记录</strong>
+                        <button class="secondary-action" id="smelting-log-mode-toggle" type="button">收藏</button>
+                      </div>
+                      <ol class="drawer-list" id="smelting-log-list"></ol>
+                    </div>
+                  </aside>
+                </div>
+              </section>
+
+              <section class="metallurgy-station" data-station="forging" data-metallurgy-panel="forging" aria-labelledby="forging-title">
+                <div class="station-title">
+                  <div>
+                    <h3 id="forging-title">锻造</h3>
+                    <small>投入金属，锻出一把刃。</small>
+                  </div>
+                </div>
+
+                <div class="station-workbench">
+                  <section class="station-column ingredient-column" aria-label="锻造投料">
+                    <strong>投料</strong>
+                    <div class="ingredient-list" id="forging-resource-list"></div>
+                    <div class="ingredient-controls">
+                      <button class="secondary-action" type="button" data-ingredient-action="divide" data-station="forging">/10</button>
+                      <span id="forging-selected-resource">未选择</span>
+                      <button class="secondary-action" type="button" data-ingredient-action="multiply" data-station="forging">*10</button>
+                      <button class="secondary-action" type="button" data-ingredient-action="remove" data-station="forging">-1</button>
+                      <button class="secondary-action" type="button" data-ingredient-action="add" data-station="forging">+1</button>
+                    </div>
+                  </section>
+
+                  <section class="station-column process-column" aria-label="锻造确认">
+                    <button class="process-button anvil-button" id="forge-button" type="button">
+                      <span class="process-icon" aria-hidden="true">砧</span>
+                      <strong>锻造</strong>
+                    </button>
+                  </section>
+
+                  <section class="station-column product-column" aria-label="锻造产品">
+                    <strong>产品</strong>
+                    <div class="product-display blade-product" id="forging-product">
+                      <span>尚未锻造</span>
+                      <small>刃属性会显示在这里。</small>
+                    </div>
+                    <div class="current-loadout" id="forging-current-inputs">未投料</div>
+                  </section>
+
+                  <aside class="metallurgy-drawer" id="forging-drawer" aria-label="背包抽屉">
+                    <button class="drawer-toggle" id="forging-drawer-toggle" type="button" aria-expanded="false">
+                      <span aria-hidden="true">‹</span>
+                      <small>背包</small>
+                    </button>
+                    <div class="drawer-body">
+                      <div class="drawer-head">
+                        <strong>背包</strong>
+                        <div class="drawer-head-actions">
+                          <small>20 格</small>
+                          <button class="secondary-action" id="blade-batch-delete-toggle" type="button">批量</button>
+	                          <button class="secondary-action danger-action" id="blade-batch-delete-button" type="button" disabled hidden>销毁所选</button>
+                          <button class="secondary-action" id="blade-favorite-button" type="button" disabled>收藏</button>
+                          <button class="secondary-action" id="blade-reproduce-button" type="button" disabled>再生产</button>
+	                          <button class="secondary-action danger-action" id="blade-delete-button" type="button" disabled>销毁</button>
+                        </div>
+                      </div>
+                      <div class="blade-detail" id="blade-detail">选择一把刃查看属性</div>
+                      <div class="blade-grid" id="blade-inventory-grid"></div>
+                    </div>
+                  </aside>
+                </div>
+              </section>
+
+              <section class="metallurgy-station" data-station="inscription" data-metallurgy-panel="inscription" aria-label="铭文"></section>
+            </div>
+
+            <nav class="metallurgy-subnav" aria-label="冶金功能切换">
+              <button class="metallurgy-subtab is-active" type="button" data-metallurgy-tab="smelting" aria-selected="true">冶炼</button>
+              <button class="metallurgy-subtab" type="button" data-metallurgy-tab="forging" aria-selected="false">锻造</button>
+              <button class="metallurgy-subtab" type="button" data-metallurgy-tab="inscription" aria-selected="false" hidden>铭文</button>
+            </nav>
+          </div>
+        </section>
+
+        <section class="screen is-headless" data-screen="battle" aria-label="战斗">
+          <div class="battle-layout">
+            <section class="battle-enemy-panel" aria-label="敌人">
+              <div class="battle-enemy-card" id="battle-enemy-card"></div>
+              <aside class="battle-log-panel" aria-label="战斗记录">
+                <div class="battle-log-head">
+                  <strong>记录</strong>
+                  <small id="battle-log-summary">0 条</small>
+                </div>
+                <ol class="battle-log-list" id="battle-log-list"></ol>
+              </aside>
+            </section>
+
+            <section class="battle-actions" aria-label="战斗操作">
+              <div class="battle-action-row battle-action-row-main">
+                <button class="secondary-action battle-flee-button" id="battle-flee-button" type="button">逃跑</button>
+	                <select id="battle-cr-select" aria-label="下一只敌人的 CR">
+	                  <option value="1">CR1</option>
+	                  <option value="2">CR2</option>
+	                  <option value="3">CR3</option>
+	                  <option value="4">CR4</option>
+	                  <option value="5">CR5</option>
+	                  <option value="6">CR6</option>
+	                  <option value="7">CR7</option>
+	                  <option value="8">CR8</option>
+	                </select>
+                <button class="primary-action" id="battle-auto-toggle" type="button">自动战斗</button>
+                <button class="secondary-action" id="battle-attack-button" type="button">手动攻击</button>
+              </div>
+              <div class="battle-action-row battle-action-row-support">
+                <button class="secondary-action battle-hone-button" id="battle-hone-button" type="button">
+                  <strong>磨刃</strong>
+                  <small>锋利+0</small>
+                </button>
+                <button class="secondary-action" id="battle-inscription-button" type="button" disabled hidden>铭文</button>
+              </div>
+            </section>
+
+            <section class="battle-blade-panel" aria-label="当前刃">
+              <div class="battle-blade-card" id="battle-selected-blade"></div>
+
+              <aside class="battle-drawer" id="battle-drawer" aria-label="战斗背包">
+                <button class="drawer-toggle" id="battle-drawer-toggle" type="button" aria-expanded="false">
+                  <span aria-hidden="true">‹</span>
+                  <small>背包</small>
+                </button>
+                <div class="drawer-body">
+	                  <div class="drawer-head">
+	                    <strong>刃背包</strong>
+	                    <div class="drawer-head-actions">
+	                      <small id="battle-inventory-summary">0 / 20</small>
+	                      <button class="secondary-action" id="battle-blade-batch-delete-toggle" type="button">批量</button>
+		                      <button class="secondary-action danger-action" id="battle-blade-batch-delete-button" type="button" disabled hidden>销毁所选</button>
+	                      <button class="secondary-action" id="battle-blade-favorite-button" type="button" disabled>收藏</button>
+		                      <button class="secondary-action danger-action" id="battle-blade-delete-button" type="button" disabled>销毁</button>
+	                    </div>
+	                  </div>
+                  <div class="blade-grid battle-blade-grid" id="battle-blade-list"></div>
+                </div>
+              </aside>
+            </section>
+          </div>
+        </section>
+
+        <section class="screen" data-screen="settings" aria-labelledby="settings-title">
+          <div class="screen-head">
+            <div>
+              <p class="kicker">本地</p>
+              <h2 id="settings-title">系统</h2>
+            </div>
+            <span class="pill" id="version-label">v1.0</span>
+          </div>
+
+          <div class="settings-layout">
+            <nav class="settings-subnav" aria-label="系统功能切换">
+              <button class="settings-subtab is-active" type="button" data-settings-tab="settings" aria-selected="true">设置</button>
+              <button class="settings-subtab" type="button" data-settings-tab="stats" aria-selected="false">数据统计</button>
+              <button class="settings-subtab" type="button" data-settings-tab="milestones" aria-selected="false">里程碑</button>
+            </nav>
+
+            <section class="settings-panel is-active" data-settings-panel="settings" aria-label="系统设置">
+              <label class="toggle-row">
+                <span>
+                  <strong>自动保存</strong>
+                  <small id="autosave-state">开启</small>
+                </span>
+                <input id="autosave-toggle" type="checkbox" checked />
+              </label>
+
+              <label class="toggle-row">
+                <span>
+                  <strong>紧凑数字</strong>
+                  <small id="compact-state">开启</small>
+                </span>
+                <input id="compact-toggle" type="checkbox" checked />
+              </label>
+
+              <textarea id="save-code" rows="4" spellcheck="false" placeholder="存档码"></textarea>
+
+              <div class="button-grid">
+                <button class="secondary-action" id="save-button" type="button">保存</button>
+                <button class="secondary-action" id="export-button" type="button">导出</button>
+                <button class="secondary-action" id="import-button" type="button">导入</button>
+                <button class="secondary-action danger-action" id="reset-button" type="button">重置</button>
+              </div>
+
+              <p class="settings-message" id="settings-message">本地存档未写入。</p>
+            </section>
+
+            <section class="settings-panel stats-panel" data-settings-panel="stats" aria-label="数据统计">
+              <div class="stats-list" id="stats-list"></div>
+            </section>
+
+            <section class="settings-panel milestones-panel" data-settings-panel="milestones" aria-label="里程碑">
+              <div class="milestone-list" id="milestone-list"></div>
+            </section>
+          </div>
+        </section>
+      </section>
+
+      <nav class="tab-bar" aria-label="功能分页">
+        <button class="tab-button is-active" type="button" data-target="home" aria-selected="true">主页</button>
+        <button class="tab-button" type="button" data-target="research" aria-selected="false">研究</button>
+        <button class="tab-button" type="button" data-target="metallurgy" data-feature="metallurgy" aria-selected="false" hidden>冶金</button>
+        <button class="tab-button" type="button" data-target="battle" data-feature="battle" aria-selected="false" hidden>战斗</button>
+      </nav>
+    </main>
+
+    <script src="./research.js"></script>
+    <script src="./forgingFormula.js"></script>
+    <script src="./bladeNaming.js"></script>
+    <script src="./battleFormula.js"></script>
+    <script src="./main.js"></script>
+  </body>
+</html>

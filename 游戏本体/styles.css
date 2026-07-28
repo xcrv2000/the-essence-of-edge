@@ -1,0 +1,2320 @@
+:root {
+  color-scheme: dark;
+  --bg: #000;
+  --panel: #080808;
+  --panel-2: #111;
+  --line: #2a2a2a;
+  --line-strong: #f5f5f5;
+  --text: #f7f7f7;
+  --muted: #9b9b9b;
+  --muted-2: #6f6f6f;
+  --inverse: #050505;
+  --radius: 6px;
+  --tap: 48px;
+  font-family:
+    "Noto Sans SC",
+    "Microsoft YaHei",
+    "PingFang SC",
+    sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.35;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+  background: var(--bg);
+}
+
+body {
+  overflow: hidden;
+}
+
+button,
+textarea,
+input {
+  font: inherit;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+.app-shell {
+  width: min(100vw, 430px);
+  height: 100dvh;
+  min-height: 520px;
+  margin: 0 auto;
+  padding:
+    max(8px, env(safe-area-inset-top))
+    10px
+    max(8px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.title-bar {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.title-copy {
+  min-width: 0;
+}
+
+.title-copy p,
+.kicker,
+.resource-card span,
+.resource-card small,
+.status-card span,
+.research-card p,
+.research-card small,
+.toggle-row small,
+.stat-row span,
+.settings-message {
+  color: var(--muted);
+}
+
+.title-copy p,
+.kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  margin-top: 2px;
+  font-size: 1.22rem;
+  line-height: 1.1;
+  font-weight: 800;
+  text-wrap: pretty;
+}
+
+h2 {
+  margin-top: 2px;
+  font-size: 1.05rem;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+h3 {
+  font-size: 0.86rem;
+  line-height: 1.2;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.title-stats {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+}
+
+.title-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.title-stats span,
+.pill {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  white-space: nowrap;
+}
+
+.title-stats span {
+  min-height: 44px;
+}
+
+.title-stats strong {
+  font-size: 0.98rem;
+}
+
+.title-stats small,
+.pill {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.settings-shortcut {
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--muted);
+}
+
+.settings-shortcut.is-active {
+  border-color: var(--line-strong);
+  background: var(--text);
+  color: var(--inverse);
+}
+
+.settings-shortcut span {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.screen-stage {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.screen {
+  height: 100%;
+  min-height: 0;
+  display: none;
+}
+
+.screen.is-active {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+}
+
+.screen.is-headless.is-active {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.screen-head {
+  min-height: 38px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.home-layout,
+.research-layout,
+.metallurgy-layout,
+.battle-layout,
+.settings-layout {
+  min-height: 0;
+  display: grid;
+  gap: 9px;
+  overflow: hidden;
+}
+
+.home-layout {
+  grid-template-rows: auto auto auto auto minmax(260px, 1fr);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.research-layout {
+  grid-auto-rows: max-content;
+  align-content: start;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.battle-layout {
+  position: relative;
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1.18fr);
+  overflow: hidden;
+}
+
+.battle-enemy-panel {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(108px, 0.75fr);
+  gap: 8px;
+}
+
+.battle-enemy-card,
+.battle-log-panel,
+.battle-blade-card {
+  min-width: 0;
+  min-height: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.battle-enemy-card,
+.battle-blade-card,
+.battle-log-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.battle-card-head,
+.battle-section-head,
+.battle-log-head {
+  min-width: 0;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.battle-card-head strong,
+.battle-section-head strong,
+.battle-log-head strong {
+  display: block;
+  font-size: 0.82rem;
+}
+
+.battle-card-head small,
+.battle-section-head small,
+.battle-log-head small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.battle-enemy-identity {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.battle-enemy-avatar {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.battle-hp-row {
+  display: grid;
+  gap: 6px;
+}
+
+.battle-hp-row strong {
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.battle-hp-meter {
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-2);
+}
+
+.battle-hp-meter span {
+  height: 100%;
+  display: block;
+  background: var(--text);
+}
+
+.battle-enemy-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.battle-stat-pill {
+  min-width: 0;
+  padding: 5px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  font-size: 0.7rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.battle-log-panel {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.battle-log-list {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  align-content: end;
+  gap: 5px;
+  list-style: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.battle-log-list li {
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.68rem;
+  overflow-wrap: anywhere;
+}
+
+.battle-actions {
+  min-height: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.battle-action-row {
+  min-height: 0;
+  display: grid;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.battle-action-row-main {
+  grid-template-columns: 56px 64px minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.battle-action-row-support {
+  grid-template-columns: minmax(0, 1fr) minmax(84px, 0.42fr);
+}
+
+.battle-action-row select,
+.battle-action-row .primary-action,
+.battle-action-row .secondary-action {
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.battle-hone-button {
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.1;
+}
+
+.battle-hone-button strong,
+.battle-hone-button small {
+  min-width: 0;
+  display: block;
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+.battle-hone-button strong {
+  font-size: 0.74rem;
+}
+
+.battle-hone-button small {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.battle-hone-button:disabled small {
+  color: var(--muted-2);
+}
+
+.battle-action-row select {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.battle-action-row .primary-action.is-active {
+  border-color: var(--line-strong);
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.battle-blade-panel {
+  position: relative;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding-right: 38px;
+}
+
+.battle-blade-body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(160px, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.battle-blade-card {
+  position: relative;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.battle-blade-card .blade-radar {
+  width: 100%;
+  max-width: 220px;
+  justify-self: center;
+}
+
+.battle-info-button {
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  flex: 0 0 auto;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--panel-2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.battle-info-popover {
+  position: absolute;
+  inset: 8px 46px 8px 8px;
+  z-index: 5;
+  min-width: 0;
+  min-height: 0;
+  padding: 12px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.battle-info-popover-head {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.battle-info-popover-head strong {
+  font-size: 0.8rem;
+}
+
+.battle-info-close {
+  width: 28px;
+  min-height: 28px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.battle-info-list {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 8px;
+}
+
+.battle-info-item {
+  min-width: 0;
+  padding: 8px;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.battle-info-item strong {
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.battle-info-item p {
+  min-width: 0;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.67rem;
+  line-height: 1.38;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.battle-drawer {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 30px;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  z-index: 3;
+}
+
+.battle-drawer.is-open {
+  width: 100%;
+}
+
+.battle-drawer.is-open .drawer-body {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-left: 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--panel);
+}
+
+.battle-drawer .drawer-head {
+  align-items: flex-start;
+}
+
+.battle-drawer .drawer-head-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.battle-drawer .drawer-head button {
+  min-height: 28px;
+  padding: 0 6px;
+  font-size: 0.64rem;
+}
+
+.battle-blade-grid {
+  min-height: 0;
+  height: 100%;
+}
+
+.battle-blade-grid .blade-slot.is-selected {
+  background: var(--text);
+  color: var(--inverse);
+}
+
+.metal-resource-panel {
+  min-height: 50px;
+  padding: 7px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 8px;
+}
+
+.metal-resource-head {
+  min-width: 34px;
+  display: grid;
+  align-content: center;
+  gap: 1px;
+}
+
+.metal-resource-head strong,
+.metal-resource-head small {
+  display: block;
+}
+
+.metal-resource-head strong {
+  font-size: 0.78rem;
+}
+
+.metal-resource-head small {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.metal-resource-list {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.metal-resource-item {
+  min-width: 0;
+  min-height: 36px;
+  padding: 4px 5px;
+  display: grid;
+  align-content: center;
+  gap: 1px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.metal-resource-item span,
+.metal-resource-item strong {
+  min-width: 0;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.metal-resource-item span {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.metal-resource-item strong {
+  color: var(--text);
+  font-size: 0.76rem;
+  line-height: 1;
+}
+
+.metal-resource-item.is-empty strong {
+  color: var(--muted-2);
+}
+
+.metallurgy-layout {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.metallurgy-panels {
+  min-height: 0;
+  display: grid;
+  overflow: hidden;
+}
+
+.metallurgy-station {
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  overflow: hidden;
+  display: none;
+}
+
+.metallurgy-station.is-active {
+  display: grid;
+}
+
+.metallurgy-station[data-station="inscription"] {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.inscription-epilogue {
+  --w7-wheel-size: min(220px, 58vw);
+  --epilogue-gap: 16px;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(10px, 3dvh, 22px) 14px 14px;
+  display: grid;
+  grid-template-rows: auto var(--w7-wheel-size);
+  justify-items: center;
+  align-content: start;
+  gap: var(--epilogue-gap);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.inscription-epilogue-text {
+  width: min(100%, 540px);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  text-align: left;
+  text-wrap: pretty;
+}
+
+.inscription-epilogue-text p {
+  margin: 0;
+}
+
+.inscription-epilogue-button {
+  width: min(100%, 180px);
+  align-self: center;
+  justify-content: center;
+}
+
+.w7-wheel-hint {
+  width: var(--w7-wheel-size);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.w7-wheel-hint svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.w7-wheel-edge {
+  stroke: #747474;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.w7-wheel-node {
+  fill: #747474;
+  stroke: #b7b7b7;
+  stroke-width: 2;
+}
+
+.w7-wheel-node.is-center {
+  fill: #9a9a9a;
+}
+
+.station-title {
+  min-height: 34px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.station-title div {
+  min-width: 0;
+}
+
+.station-title small,
+.current-loadout,
+.product-display small,
+.ingredient-option small,
+.ingredient-option span,
+.empty-note,
+.drawer-head small,
+.blade-detail,
+.blade-meta-list {
+  color: var(--muted);
+}
+
+.station-title small {
+  display: block;
+  max-width: 23em;
+  margin-top: 3px;
+  font-size: 0.72rem;
+  text-wrap: pretty;
+}
+
+.station-workbench {
+  --ingredient-zone-height: clamp(150px, 30dvh, 256px);
+  position: relative;
+  min-height: 0;
+  display: grid;
+  grid-template-areas:
+    "product process"
+    "ingredients ingredients";
+  grid-template-columns: minmax(0, 1fr) minmax(72px, 0.3fr);
+  grid-template-rows:
+    minmax(106px, 1fr)
+    minmax(var(--ingredient-zone-height), var(--ingredient-zone-height));
+  gap: 10px;
+  padding-right: 34px;
+  overflow: hidden;
+}
+
+.metallurgy-station[data-station="smelting"] .station-workbench {
+  grid-template-rows:
+    minmax(106px, 1fr)
+    minmax(var(--ingredient-zone-height), var(--ingredient-zone-height));
+}
+
+.station-column,
+.drawer-body {
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.station-column {
+  padding: 10px;
+  display: grid;
+  gap: 9px;
+  overflow: hidden;
+}
+
+.station-column > strong {
+  font-size: 0.8rem;
+}
+
+.ingredient-column {
+  grid-area: ingredients;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.metallurgy-station[data-station="smelting"] .ingredient-column {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ingredient-list {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  align-content: start;
+  gap: 7px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.metallurgy-station[data-station="smelting"] .ingredient-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+.metallurgy-station[data-station="forging"] .ingredient-list {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metallurgy-station[data-station="smelting"] .ingredient-column,
+.metallurgy-station[data-station="forging"] .ingredient-column {
+  grid-template-rows: auto minmax(0, 117px) auto;
+}
+
+.ingredient-option {
+  min-height: 44px;
+  padding: 5px 7px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: repeat(2, auto);
+  align-content: center;
+  gap: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  color: var(--text);
+  text-align: left;
+}
+
+.ingredient-option.is-selected {
+  border-color: var(--line-strong);
+  background: var(--text);
+  color: var(--inverse);
+}
+
+.ingredient-option strong,
+.ingredient-option small,
+.ingredient-option span {
+  display: block;
+  font-size: 0.68rem;
+}
+
+.ingredient-option strong {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 0.82rem;
+}
+
+.ingredient-option small,
+.ingredient-option span {
+  grid-column: 2;
+  text-align: right;
+}
+
+.ingredient-option small {
+  grid-row: 1;
+}
+
+.ingredient-option span {
+  grid-row: 2;
+}
+
+.ingredient-option.is-selected small,
+.ingredient-option.is-selected span {
+  color: var(--inverse);
+}
+
+.ingredient-controls {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  grid-template-rows: repeat(2, 40px);
+  align-items: center;
+  gap: 6px;
+}
+
+.metallurgy-station[data-station="smelting"] .ingredient-controls {
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+}
+
+.ingredient-controls button {
+  min-width: 0;
+  min-height: 40px;
+  padding: 0;
+  font-size: 0.72rem;
+}
+
+.ingredient-controls span {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-width: 0;
+  min-height: 86px;
+  padding: 6px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  font-size: 0.72rem;
+  text-align: center;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.ingredient-controls button[data-ingredient-action="divide"] {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.ingredient-controls button[data-ingredient-action="remove"] {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.ingredient-controls button[data-ingredient-action="multiply"] {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.ingredient-controls button[data-ingredient-action="add"] {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.process-column {
+  grid-area: process;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.current-loadout {
+  min-height: 0;
+  padding: 7px;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  font-size: 0.72rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.current-loadout small {
+  color: var(--muted);
+}
+
+.current-loadout .loadout-limit.is-full {
+  color: var(--line-strong);
+  font-weight: 800;
+}
+
+.process-button {
+  min-width: 0;
+  min-height: 0;
+  padding: 8px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--text);
+  color: var(--inverse);
+  font-weight: 900;
+}
+
+.process-button strong {
+  max-width: 100%;
+  line-height: 1.15;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.process-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.metallurgy-station .process-icon {
+  width: 42px;
+  height: 42px;
+  font-size: 1.28rem;
+}
+
+.anvil-button .process-icon {
+  border-radius: 6px 6px 14px 14px;
+}
+
+.product-column {
+  grid-area: product;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.product-display {
+  min-height: 0;
+  padding: 10px;
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.product-display span {
+  font-size: 1.02rem;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.product-display small {
+  font-size: 0.72rem;
+  text-wrap: pretty;
+}
+
+.metallurgy-drawer {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 30px;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  z-index: 2;
+}
+
+.metallurgy-drawer.is-open {
+  width: min(calc(100% - 10px), 340px);
+}
+
+.metallurgy-station[data-station="forging"] .metallurgy-drawer.is-open {
+  width: 100%;
+}
+
+.drawer-toggle {
+  min-width: 0;
+  min-height: 0;
+  padding: 4px 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  color: var(--muted);
+}
+
+.drawer-toggle small {
+  writing-mode: vertical-rl;
+  font-size: 0.66rem;
+}
+
+.drawer-toggle span {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.drawer-body {
+  display: none;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.metallurgy-drawer.is-open .drawer-body {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.metallurgy-station[data-station="forging"] .metallurgy-drawer.is-open .drawer-body {
+  grid-template-rows:
+    auto
+    minmax(0, 1fr)
+    minmax(var(--ingredient-zone-height), var(--ingredient-zone-height));
+}
+
+.drawer-head {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.drawer-head button {
+  min-height: 32px;
+  padding: 0 8px;
+}
+
+.drawer-head button.is-active {
+  border-color: var(--line-strong);
+  background: var(--text);
+  color: var(--inverse);
+}
+
+.drawer-head-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.drawer-list {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  list-style: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.drawer-record {
+  min-height: 40px;
+  padding: 7px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.drawer-record span {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.record-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.record-reproduce {
+  min-height: 32px;
+  padding: 0 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.68rem;
+}
+
+.record-star {
+  width: 32px;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.record-star:disabled {
+  color: var(--muted-2);
+}
+
+.blade-grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+  overflow: hidden;
+}
+
+.blade-slot {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: 3px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  place-items: center;
+  align-content: center;
+  gap: 1px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 0.66rem;
+  overflow: hidden;
+}
+
+.blade-slot.is-empty {
+  color: var(--muted-2);
+}
+
+.blade-slot.is-selected {
+  border-color: var(--line-strong);
+}
+
+.blade-slot.is-batch-selected {
+  border-color: var(--line-strong);
+  background: var(--text);
+  color: var(--inverse);
+}
+
+.blade-slot.is-batch-selected::after {
+  content: "✓";
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--inverse);
+  color: var(--text);
+  font-size: 0.62rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.blade-slot.is-batch-locked {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--muted);
+}
+
+.blade-icon {
+  position: relative;
+  width: 1.5em;
+  height: 1.5em;
+  display: grid;
+  place-items: center;
+  font-size: 1.08rem;
+  line-height: 1;
+}
+
+.blade-favorite-mark {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  display: none;
+  color: var(--line-strong);
+  font-size: 0.7rem;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 0 var(--inverse);
+}
+
+.blade-slot.is-favorite .blade-favorite-mark {
+  display: block;
+}
+
+.blade-slot.is-unusable .blade-icon::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border: 1px solid rgba(255, 98, 98, 0.88);
+  border-radius: 4px;
+  background: rgba(164, 24, 24, 0.62);
+}
+
+.blade-slot small {
+  max-width: 100%;
+  min-width: 0;
+  display: block;
+  color: inherit;
+  font-size: 0.62rem;
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.blade-detail {
+  min-height: 0;
+  padding: 7px;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, auto);
+  align-content: start;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.blade-detail-title {
+  min-width: 0;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.blade-detail-title strong,
+.blade-detail-title small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.blade-detail-title strong {
+  font-size: 0.86rem;
+}
+
+.blade-detail-title small {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.blade-detail-title small.is-unusable {
+  color: #ff8989;
+}
+
+.blade-detail-title small.is-favorite:not(.is-unusable) {
+  color: var(--text);
+}
+
+.blade-batch-delete-list {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.blade-batch-delete-list span {
+  min-width: 0;
+  display: block;
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.blade-stat-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 8px;
+}
+
+.blade-detail-body {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(86px, 1fr) minmax(118px, 150px);
+  align-items: center;
+  gap: 10px;
+}
+
+.blade-detail-stats {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.blade-detail-stat-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 3.5em minmax(0, 1fr);
+  align-items: baseline;
+  gap: 6px;
+  text-align: left;
+}
+
+.blade-detail-stat-row span {
+  color: var(--muted);
+}
+
+.blade-detail-stat-row strong {
+  min-width: 0;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.blade-radar {
+  min-width: 0;
+  width: 100%;
+  max-width: 150px;
+  aspect-ratio: 1;
+  justify-self: end;
+  pointer-events: none;
+}
+
+.blade-radar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.blade-radar-grid {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.blade-radar-axis {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.blade-radar-area {
+  fill: rgba(245, 245, 245, 0.22);
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.blade-radar-area-max {
+  fill: rgba(245, 245, 245, 0.08);
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+
+.blade-radar-point {
+  fill: var(--text);
+}
+
+.blade-radar-label {
+  fill: var(--text);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0;
+  dominant-baseline: middle;
+}
+
+.blade-radar-label-value {
+  fill: var(--muted);
+  font-size: 7px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.blade-stat-list span,
+.blade-meta-list span {
+  min-width: 0;
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.blade-stat-list span {
+  color: var(--text);
+  font-size: 0.72rem;
+}
+
+.blade-meta-list {
+  display: grid;
+  gap: 4px;
+  font-size: 0.68rem;
+}
+
+.blade-meta-panel {
+  min-height: 0;
+  max-height: 92px;
+  margin-top: 7px;
+  padding-top: 8px;
+  display: grid;
+  gap: 5px;
+  border-top: 1px solid var(--line);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.metallurgy-subnav {
+  min-height: 52px;
+  padding-top: 8px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.metallurgy-subtab {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  font-weight: 800;
+}
+
+.metallurgy-subtab.is-active {
+  border-color: var(--line-strong);
+  background: var(--text);
+  color: var(--inverse);
+}
+
+.empty-note {
+  margin: 0;
+  font-size: 0.72rem;
+  text-wrap: pretty;
+}
+
+.settings-layout {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.settings-subnav {
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.settings-subtab {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  font-weight: 800;
+}
+
+.settings-subtab.is-active {
+  border-color: var(--line-strong);
+  background: var(--text);
+  color: var(--inverse);
+}
+
+.settings-panel {
+  min-height: 0;
+  display: none;
+  overflow: hidden;
+}
+
+.settings-panel.is-active {
+  display: grid;
+  gap: 9px;
+}
+
+.settings-panel[data-settings-panel="settings"] {
+  grid-template-rows: auto auto minmax(72px, 88px) auto auto;
+}
+
+.stats-panel.is-active,
+.milestones-panel.is-active {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.stats-list,
+.milestone-list {
+  min-height: 0;
+  display: grid;
+  grid-auto-rows: max-content;
+  gap: 8px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.milestone-card {
+  min-height: 58px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.milestone-card.is-locked {
+  color: var(--muted-2);
+}
+
+.milestone-card.is-complete {
+  border-color: var(--line-strong);
+}
+
+.milestone-copy {
+  min-width: 0;
+  display: grid;
+}
+
+.milestone-copy strong,
+.milestone-meta,
+.milestone-count {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.milestone-copy strong {
+  font-size: 0.82rem;
+}
+
+.milestone-meta {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  color: var(--muted);
+  text-align: right;
+}
+
+.milestone-count {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.milestone-card.is-locked .milestone-count {
+  color: var(--muted-2);
+}
+
+.milestone-badge {
+  justify-self: end;
+  width: fit-content;
+  padding: 2px 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.stat-card {
+  min-height: 0;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.stat-card > strong {
+  font-size: 0.82rem;
+}
+
+.stat-rows {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.stat-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(68px, 0.75fr) minmax(0, 1.25fr);
+  align-items: start;
+  gap: 8px;
+  font-size: 0.74rem;
+}
+
+.stat-row span,
+.stat-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.stat-row strong {
+  font-size: 0.76rem;
+  text-align: right;
+}
+
+.life-panel,
+.metal-resource-panel,
+.resource-card,
+.status-card,
+.research-card,
+.event-log,
+.lock-panel,
+.toggle-row,
+textarea {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.life-panel {
+  min-height: 96px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.life-core {
+  width: 54px;
+  height: 54px;
+  border: 1px solid var(--line-strong);
+  border-radius: 43% 57% 50% 50% / 58% 47% 53% 42%;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.9) 0 4px, transparent 5px),
+    radial-gradient(circle at 68% 72%, rgba(255, 255, 255, 0.28), transparent 18px),
+    #1c1c1c;
+}
+
+.life-panel span,
+.life-panel strong,
+.life-panel small {
+  display: block;
+  min-width: 0;
+}
+
+.life-panel span,
+.life-panel small {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.life-panel strong {
+  margin: 4px 0;
+  font-size: 0.96rem;
+  line-height: 1.25;
+  text-wrap: pretty;
+}
+
+.resource-grid,
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.resource-card {
+  min-height: 90px;
+  padding: 11px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 3px;
+}
+
+.resource-card span,
+.resource-card strong,
+.resource-card small,
+.status-card span,
+.status-card strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resource-card span,
+.resource-card small,
+.status-card span {
+  font-size: 0.73rem;
+}
+
+.resource-card strong {
+  align-self: center;
+  font-size: 1.65rem;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.primary-action,
+.secondary-action,
+.tab-button {
+  min-height: var(--tap);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--text);
+  color: var(--inverse);
+  font-weight: 800;
+}
+
+.primary-action {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px;
+  font-size: 1rem;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.primary-action span,
+.primary-action strong {
+  position: relative;
+  z-index: 1;
+}
+
+.primary-action strong {
+  font-size: 1.04rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.secondary-action {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.danger-action {
+  border-color: var(--muted-2);
+  color: var(--muted);
+}
+
+button:focus-visible,
+textarea:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  border-color: var(--line);
+  background: #171717;
+  color: var(--muted-2);
+}
+
+#sulfur-button {
+  --cooldown-progress: 0%;
+}
+
+#sulfur-button::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 0;
+  width: var(--cooldown-progress);
+  background: rgba(245, 245, 245, 0.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: width 120ms linear, opacity 120ms ease;
+}
+
+#sulfur-button.is-cooling {
+  background: #2a2a2a;
+  color: var(--inverse);
+}
+
+#sulfur-button.is-cooling::before {
+  opacity: 1;
+}
+
+.status-card {
+  min-height: 56px;
+  padding: 9px 10px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+}
+
+.status-card strong {
+  font-size: 0.95rem;
+}
+
+.event-log {
+  height: auto;
+  min-height: 260px;
+  margin: 0;
+  padding: 8px 10px;
+  list-style: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.event-log li {
+  min-height: 18px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-log li:first-child {
+  color: var(--text);
+}
+
+.research-list {
+  display: grid;
+  gap: 8px;
+}
+
+.research-section {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.research-section.is-collapsed .research-list {
+  display: none;
+}
+
+.research-section-head {
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.research-section-toggle {
+  min-height: 30px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.research-section-toggle span {
+  width: 0.8em;
+  color: var(--text);
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+.research-section-toggle small {
+  font-size: inherit;
+}
+
+.research-card {
+  min-height: 72px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 10px;
+}
+
+.research-card > div {
+  min-width: 0;
+}
+
+.research-card strong,
+.research-card p,
+.research-card small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-wrap: pretty;
+}
+
+.research-card strong {
+  font-size: 0.95rem;
+}
+
+.research-card p {
+  margin-top: 4px;
+  font-size: 0.78rem;
+}
+
+.research-card small {
+  font-size: 0.72rem;
+}
+
+.research-meta {
+  margin-top: 7px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.research-meta small {
+  max-width: 100%;
+}
+
+.owned-research-card {
+  grid-template-columns: minmax(0, 1fr) minmax(86px, auto);
+}
+
+.owned-research-card.is-inactive {
+  opacity: 0.72;
+}
+
+.research-active-controls {
+  min-width: 86px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  align-self: stretch;
+}
+
+.research-active-controls button {
+  min-height: 30px;
+  padding: 0 6px;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.research-active-controls button:disabled {
+  color: var(--muted-2);
+}
+
+.upgrade-research-card button {
+  min-width: 72px;
+  max-width: 96px;
+  min-height: 42px;
+  padding: 0 8px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.lock-panel {
+  min-height: 138px;
+  padding: 16px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+}
+
+.lock-panel strong {
+  font-size: 1.14rem;
+}
+
+.lock-panel p {
+  max-width: 28em;
+  color: var(--muted);
+  font-size: 0.86rem;
+  text-wrap: pretty;
+}
+
+.toggle-row {
+  min-height: 50px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.toggle-row span,
+.toggle-row strong,
+.toggle-row small {
+  display: block;
+}
+
+.toggle-row strong {
+  font-size: 0.92rem;
+}
+
+.toggle-row small {
+  margin-top: 2px;
+  font-size: 0.74rem;
+}
+
+.toggle-row input {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  accent-color: var(--text);
+}
+
+textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  resize: none;
+  color: var(--text);
+  outline: none;
+}
+
+textarea::placeholder {
+  color: var(--muted-2);
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.button-grid button {
+  min-height: 44px;
+}
+
+.settings-message {
+  min-height: 18px;
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
+}
+
+.tab-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.tab-button {
+  min-width: 0;
+  min-height: 50px;
+  padding: 0 4px;
+  background: var(--panel);
+  color: var(--muted);
+}
+
+.tab-button.is-active {
+  background: var(--text);
+  color: var(--inverse);
+}
+
+.tab-button.has-research-ready:not(.is-active) {
+  border-color: var(--line-strong);
+  background: var(--panel-2);
+  color: var(--text);
+  text-shadow: 0 0 12px rgba(245, 245, 245, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(245, 245, 245, 0.28),
+    0 0 16px rgba(245, 245, 245, 0.12);
+}
+
+@media (hover: hover) {
+  button:not(:disabled):hover {
+    border-color: var(--text);
+  }
+}
+
+@media (max-height: 600px) {
+  .app-shell {
+    gap: 8px;
+  }
+
+  .title-bar {
+    min-height: 52px;
+    padding-bottom: 8px;
+  }
+
+  .life-panel {
+    min-height: 82px;
+  }
+
+  .resource-card {
+    min-height: 76px;
+  }
+
+  .resource-card strong {
+    font-size: 1.42rem;
+  }
+
+  .status-card {
+    min-height: 50px;
+  }
+
+  .event-log {
+    min-height: 242px;
+  }
+
+  .metallurgy-station {
+    gap: 8px;
+  }
+
+  .station-workbench {
+    --ingredient-zone-height: 150px;
+    grid-template-rows:
+      minmax(76px, 1fr)
+      minmax(var(--ingredient-zone-height), var(--ingredient-zone-height));
+    gap: 8px;
+  }
+
+  .metallurgy-station[data-station="smelting"] .station-workbench {
+    grid-template-rows:
+      minmax(76px, 1fr)
+      minmax(var(--ingredient-zone-height), var(--ingredient-zone-height));
+  }
+
+  .metallurgy-station[data-station="forging"] .ingredient-column {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  .station-column {
+    padding: 8px;
+    gap: 7px;
+  }
+
+  .product-display {
+    padding: 7px;
+    gap: 3px;
+  }
+
+  .ingredient-option {
+    min-height: 42px;
+  }
+
+  .process-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+}

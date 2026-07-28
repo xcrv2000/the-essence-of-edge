@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b0b0b" />
+    <title>锻造与战斗公式调校器</title>
+    <link rel="stylesheet" href="./forging-debug.css" />
+  </head>
+  <body>
+    <main class="debug-shell">
+      <header class="debug-header">
+        <div>
+          <p>刃的本质 · 调试工具</p>
+          <h1>锻造与战斗公式调校器</h1>
+        </div>
+        <div class="header-note">独立工具 · 不写入游戏存档 · 战斗工具箱本地保存</div>
+      </header>
+
+      <nav class="workspace-tabs" role="tablist" aria-label="调校功能">
+        <button
+          class="workspace-tab is-active"
+          id="forging-debug-tab"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          aria-controls="forging-debug-panel"
+          data-debug-mode="forging"
+        >
+          锻造调校
+        </button>
+        <button
+          class="workspace-tab"
+          id="battle-debug-tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="battle-debug-panel"
+          data-debug-mode="battle"
+        >
+          战斗调校
+        </button>
+        <button
+          class="workspace-tab"
+          id="inscription-debug-tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="inscription-debug-panel"
+          data-debug-mode="inscription"
+        >
+          铭文调校
+        </button>
+      </nav>
+
+      <section
+        class="debug-mode-panel is-active"
+        id="forging-debug-panel"
+        role="tabpanel"
+        aria-labelledby="forging-debug-tab"
+        data-debug-panel="forging"
+      >
+        <section class="debug-workspace">
+        <aside class="panel input-panel" aria-label="投料与模拟">
+          <div class="panel-head">
+            <div>
+              <h2>输入模式</h2>
+              <small>手动锻造与随机模拟共享右侧输出。</small>
+            </div>
+          </div>
+
+          <div class="mode-tabs" role="tablist" aria-label="输入模式">
+            <button
+              class="mode-tab is-active"
+              id="manual-tab"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="manual-controls"
+              data-input-mode="manual"
+            >
+              手动投料
+            </button>
+            <button
+              class="mode-tab"
+              id="simulation-tab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="simulation-controls-panel"
+              data-input-mode="simulation"
+            >
+              随机模拟
+            </button>
+          </div>
+
+          <section
+            class="input-mode-panel is-active"
+            id="manual-controls"
+            role="tabpanel"
+            aria-labelledby="manual-tab"
+            data-input-panel="manual"
+          >
+            <div class="panel-head compact-head">
+              <div>
+                <h3>手动投料</h3>
+                <small>六种金属视为无限供应。</small>
+              </div>
+              <button class="secondary-action" id="reset-manual-button" type="button">清空</button>
+            </div>
+
+            <div class="metal-input-grid" id="manual-metal-inputs"></div>
+
+            <div class="button-row">
+              <button class="primary-action" id="forge-once-button" type="button">锻造一次</button>
+            </div>
+
+            <section class="quick-panel">
+              <h3>快速填入</h3>
+              <div class="quick-grid" id="manual-presets"></div>
+            </section>
+          </section>
+
+          <section
+            class="input-mode-panel"
+            id="simulation-controls-panel"
+            role="tabpanel"
+            aria-labelledby="simulation-tab"
+            data-input-panel="simulation"
+            hidden
+          >
+            <div class="panel-head compact-head">
+              <div>
+                <h3>随机 1000 次</h3>
+                <small>用限制条件批量试配方。</small>
+              </div>
+            </div>
+
+            <div class="simulation-controls">
+              <label>
+                <span>总原料数量</span>
+                <input id="simulation-total" type="number" min="1" step="1" value="100" />
+              </label>
+              <label>
+                <span>次数</span>
+                <input id="simulation-count" type="number" min="1" step="1" value="1000" />
+              </label>
+              <label>
+                <span>随机模式</span>
+                <select id="simulation-mode">
+                  <option value="distribution">随机分配</option>
+                  <option value="two-attribute-random">2属性随机模拟</option>
+                  <option value="three-attribute-random">3属性随机模拟</option>
+                  <option value="four-attribute-random">4属性随机模拟</option>
+                  <option value="five-attribute-random">5属性随机模拟</option>
+                  <option value="six-attribute-random">6属性随机模拟</option>
+                  <option value="single-fill">余量填入单一随机金属</option>
+                  <option value="three-metal-70">三金属 70%</option>
+                </select>
+              </label>
+            </div>
+
+            <section class="constraint-section">
+              <div class="section-title">
+                <h3>比例限制</h3>
+                <small>单位：%，步长 1</small>
+              </div>
+              <div class="constraint-grid" id="constraint-grid"></div>
+            </section>
+
+            <section class="quick-panel">
+              <h3>随机预设</h3>
+              <div class="quick-grid" id="simulation-presets"></div>
+            </section>
+
+            <section class="analysis-panel">
+              <div class="section-title">
+                <h3>筛选 Top20</h3>
+                <small>运行模拟后，按当前条件重排样本。</small>
+              </div>
+              <div class="analysis-controls">
+                <label>
+                  <span>筛选指标</span>
+                  <select id="simulation-filter-metric"></select>
+                </label>
+                <label>
+                  <span>大于</span>
+                  <input id="simulation-filter-min" type="number" step="1" placeholder="留空不过滤" />
+                </label>
+	                <label>
+	                  <span>排序依据</span>
+	                  <select id="simulation-sort-metric"></select>
+	                </label>
+	              </div>
+	              <div class="simulation-condition-head">
+	                <strong>六属性条件</strong>
+	                <small>空值忽略，多项同时满足</small>
+	              </div>
+	              <div class="simulation-condition-grid" id="simulation-condition-grid"></div>
+	              <button class="secondary-action mini-action" id="apply-simulation-filter-button" type="button">应用筛选</button>
+	            </section>
+
+            <div class="button-row">
+              <button class="primary-action" id="run-simulation-button" type="button">运行模拟</button>
+            </div>
+
+            <div id="simulation-message" class="message-line"></div>
+          </section>
+        </aside>
+
+        <section class="panel formula-panel" aria-label="公式、参数与输出">
+          <div class="panel-head">
+            <div>
+              <h2>公式与参数</h2>
+              <small>本工具可临时调整表1/表2；游戏本体仍使用默认表。</small>
+            </div>
+          </div>
+
+	          <article class="formula-card">
+	            <pre><code>baseCurve_i =
+	log(14 * r_i + 1) / log(15)
+
+major_attr =
+	Σ[ baseCurve_i ^ majorExponent * baseTable[i][attr] ]
+
+modifier_attr =
+	1 + Σ[ modifierCurve_i * modifierTable[i][attr] ]
+
+modifierCurve_i =
+	(1 - r_i)^modifierExponent * (1 - (1 - r_i)^modifierExponent)
+
+effectiveN =
+	1 / Σ(r_i ^ 2)
+
+entropy =
+	interpolate(entropyPenaltyTable, effectiveN)
+
+performance_attr =
+statPerformanceTable[attr]
+
+final_attr =
+floor(major_attr * modifier_attr / entropy * performance_attr * log(totalAmount))
+
+	// log 为十进制；高熵系数按有效基底数 effectiveN 线性插值</code></pre>
+		          </article>
+
+	          <section class="curve-panel">
+	            <div class="table-head">
+	              <div>
+	                <h3>曲线参数</h3>
+	                <small>基底指数压低中比例基底收益；掺杂指数控制小比例掺杂峰值与衰减宽度。</small>
+	              </div>
+	              <button class="secondary-action mini-action" id="reset-curve-parameters-button" type="button">重置曲线</button>
+	            </div>
+	            <div class="curve-grid">
+	              <label>
+	                <span>基底曲线指数 majorExponent</span>
+	                <input id="major-exponent-input" type="number" min="0.1" step="0.1" value="2" />
+	              </label>
+	              <label>
+	                <span>掺杂曲线指数 modifierExponent</span>
+	                <input id="modifier-exponent-input" type="number" min="0.1" step="0.1" value="16" />
+	              </label>
+	            </div>
+	            <small class="curve-help">
+	              majorExponent 大于 1 时，50%左右的投料不再轻易吃满基底；modifierExponent 越大，掺杂峰值越靠近极少量投料，且中比例衰减越快。
+	            </small>
+	          </section>
+
+	          <section class="tables-grid">
+            <article>
+              <div class="table-head">
+                <h3>表1：基底表现</h3>
+                <div class="table-actions">
+                  <button class="secondary-action mini-action" id="export-settings-button" type="button">导出当前设置</button>
+                  <button class="secondary-action mini-action" id="reset-base-table-button" type="button">重置表1</button>
+                </div>
+              </div>
+              <div class="table-wrap" id="base-table"></div>
+            </article>
+            <article>
+              <div class="table-head">
+                <h3>表2：掺杂表现</h3>
+                <button class="secondary-action mini-action" id="reset-modifier-table-button" type="button">重置表2</button>
+              </div>
+              <div class="table-wrap" id="modifier-table"></div>
+            </article>
+          </section>
+
+          <section class="performance-panel">
+            <div class="table-head">
+              <div>
+                <h3>属性表现修正</h3>
+                <small>最终属性按各自修正值再缩放，可重置回默认公式表。</small>
+              </div>
+              <button class="secondary-action mini-action" id="reset-performance-table-button" type="button">重置修正</button>
+            </div>
+	            <div class="table-wrap" id="performance-table"></div>
+	          </section>
+
+	          <section class="entropy-panel">
+	            <div class="table-head">
+		              <div>
+		                <h3>高熵系数</h3>
+		                <small>按有效基底数 effectiveN 线性插值，作为最终公式中的分母项。</small>
+		              </div>
+	              <button class="secondary-action mini-action" id="reset-entropy-table-button" type="button">重置高熵</button>
+	            </div>
+	            <div class="table-wrap" id="entropy-table"></div>
+	          </section>
+
+	          <section class="result-panel">
+            <div class="panel-head compact-head">
+              <div>
+                <h2>输出结果</h2>
+                <small id="current-summary">尚未运行。</small>
+              </div>
+            </div>
+            <div id="current-result" class="result-body empty-state">在左侧选择模式并运行。</div>
+          </section>
+        </section>
+      </section>
+
+        <section class="panel log-panel" aria-label="锻造日志">
+          <div class="panel-head">
+            <div>
+              <h2>锻造 Log</h2>
+              <small>手动锻造保留完整六属性展开明细；随机模拟保留样本与平均值。</small>
+            </div>
+            <button class="secondary-action" id="clear-log-button" type="button">清空 Log</button>
+          </div>
+          <div id="forge-log" class="forge-log empty-state">暂无记录。</div>
+        </section>
+      </section>
+
+      <section
+        class="debug-mode-panel"
+        id="battle-debug-panel"
+        role="tabpanel"
+        aria-labelledby="battle-debug-tab"
+        data-debug-panel="battle"
+        hidden
+      >
+        <section class="battle-debug-layout">
+          <section class="panel battle-main-panel" aria-label="战斗模拟">
+            <div class="panel-head">
+              <div>
+                <h2>战斗模拟</h2>
+                <small id="battle-current-summary">选择一把刃，或从锻造调校导入。</small>
+              </div>
+              <span class="battle-status-pill" id="battle-auto-state">暂停</span>
+            </div>
+
+            <section class="battle-control-grid">
+              <article class="battle-card">
+                <div class="section-title">
+                  <h3>当前刃</h3>
+                  <small>出厂 / 当前</small>
+                </div>
+                <div id="battle-blade-editor" class="battle-stat-editor"></div>
+                <div id="battle-blade-editor-radar" class="battle-editor-radar empty-state">暂无刃。</div>
+              </article>
+
+              <article class="battle-card">
+                <div class="section-title">
+                  <h3>敌人</h3>
+                  <small>当前状态 / 配置参数</small>
+                </div>
+                <div id="battle-enemy-current" class="battle-enemy-current-slot empty-state">等待敌人状态。</div>
+                <div class="battle-form-grid" id="battle-enemy-inputs"></div>
+                <div class="battle-form-grid compact-form-grid">
+                  <label>
+                    <span>刷新模式</span>
+                    <select id="battle-enemy-mode">
+                      <option value="fixed">固定同一敌人</option>
+                      <option value="incremental">每场属性递增</option>
+                      <option value="sequence">手动敌人序列</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="battle-form-grid" id="battle-enemy-increment-inputs"></div>
+                <label class="battle-textarea-field">
+                  <span>敌人序列</span>
+                  <textarea
+                    id="battle-enemy-sequence"
+                    rows="4"
+                    spellcheck="false"
+                  placeholder="每行：CR,HP,坚硬,崩裂,磨损,锈蚀"
+                  ></textarea>
+                </label>
+              </article>
+
+              <article class="battle-card">
+                <div class="section-title compact-head">
+                  <div>
+                    <h3>公式参数</h3>
+                    <small>四条指数 k + 钝化/磨刃 s</small>
+                  </div>
+                  <button class="secondary-action mini-action" id="battle-export-config-button" type="button">导出配置</button>
+                </div>
+                <div class="battle-form-grid" id="battle-param-inputs"></div>
+                <div id="battle-k-help" class="battle-k-help"></div>
+                <div id="battle-formula-preview" class="battle-formula-preview empty-state">选择刃后显示公式代入。</div>
+              </article>
+
+              <article class="battle-card enemy-generator-card">
+                <div class="section-title compact-head">
+                  <div>
+                    <h3>敌人生成</h3>
+                    <small>CR^k*s / HP倍率 / 优势项</small>
+                  </div>
+                  <div class="button-cluster">
+                    <button class="secondary-action mini-action" id="battle-generate-enemy-button" type="button">生成敌人</button>
+                    <button class="secondary-action mini-action" id="battle-export-enemy-generator-button" type="button">导出配置</button>
+                  </div>
+                </div>
+                <div class="battle-form-grid" id="battle-enemy-generator-inputs"></div>
+                <div id="battle-enemy-generator-output" class="battle-enemy-generator-output empty-state">生成后显示分配信息。</div>
+              </article>
+
+              <article class="battle-card maintenance-card battle-wide-card">
+                <div class="section-title">
+                  <h3>维护策略</h3>
+                  <small>独立用于寿命模拟</small>
+                </div>
+                <label class="toggle-line">
+                  <span>启用自动磨刃策略</span>
+                  <input id="battle-maintenance-enabled" type="checkbox" />
+                </label>
+                <div class="battle-form-grid" id="battle-maintenance-inputs"></div>
+                <label class="toggle-line">
+                  <span>允许满锋继续磨刃</span>
+                  <input id="battle-maintenance-full-hone" type="checkbox" />
+                </label>
+              </article>
+            </section>
+
+            <section class="battle-action-bar" aria-label="战斗操作">
+              <button class="primary-action" id="battle-manual-attack-button" type="button">手动攻击</button>
+              <button class="secondary-action" id="battle-auto-toggle-button" type="button">自动战斗</button>
+              <button class="secondary-action" id="battle-hone-button" type="button">磨刃</button>
+              <button class="secondary-action" id="battle-reset-current-button" type="button">当前值回满</button>
+              <button class="secondary-action" id="battle-sim-once-button" type="button">模拟 1 场</button>
+              <button class="secondary-action" id="battle-sim-10-button" type="button">模拟 10 场</button>
+              <button class="secondary-action" id="battle-sim-100-button" type="button">模拟 100 场</button>
+            </section>
+
+            <section class="battle-output-grid">
+              <article class="battle-card">
+                <div class="section-title">
+                  <h3>战斗状态</h3>
+                  <small id="battle-outcome-note">尚未开始。</small>
+                </div>
+                <div id="battle-state-output" class="battle-state-output empty-state">等待选择刃。</div>
+              </article>
+
+              <article class="battle-card">
+                <div class="section-title">
+                  <h3>雷达图</h3>
+                  <small>浅色为出厂，亮色为当前</small>
+                </div>
+                <div id="battle-radar-output" class="battle-radar-output empty-state">暂无刃。</div>
+              </article>
+
+              <article class="battle-card battle-wide-card">
+                <div class="section-title">
+                  <h3>寿命统计</h3>
+                  <small>裸战与维护策略分开</small>
+                </div>
+                <div id="battle-lifetime-output" class="battle-lifetime-output empty-state">运行模拟后显示。</div>
+              </article>
+
+              <article class="battle-card battle-wide-card">
+                <div class="section-title">
+                  <h3>战斗 Log</h3>
+                  <button class="secondary-action mini-action" id="battle-clear-log-button" type="button">清空</button>
+                </div>
+                <div id="battle-log" class="battle-log empty-state">暂无记录。</div>
+              </article>
+
+              <article class="battle-card battle-wide-card">
+                <div class="section-title">
+                  <h3>规则引用</h3>
+                  <small>来自共享战斗公式</small>
+                </div>
+                <div id="battle-rule-output" class="battle-rule-output"></div>
+              </article>
+            </section>
+          </section>
+
+          <aside class="panel battle-toolbox-panel" aria-label="刃工具箱">
+            <div class="panel-head">
+              <div>
+                <h2>刃工具箱</h2>
+                <small id="battle-toolbox-summary">本地保存 · 无上限</small>
+              </div>
+            </div>
+
+            <div class="toolbox-actions">
+              <button class="primary-action" id="battle-import-forge-button" type="button">导入锻造结果</button>
+              <button class="secondary-action" id="battle-new-blade-button" type="button">新建刃</button>
+              <button class="secondary-action" id="battle-duplicate-blade-button" type="button">复制副本</button>
+              <button class="secondary-action" id="battle-rename-blade-button" type="button">重新命名</button>
+              <button class="secondary-action danger-action" id="battle-delete-blade-button" type="button">删除</button>
+              <button class="secondary-action danger-action" id="battle-delete-selected-button" type="button">删除多选</button>
+            </div>
+
+	            <div id="battle-toolbox-list" class="battle-toolbox-list empty-state">暂无刃。</div>
+	          </aside>
+	        </section>
+	      </section>
+
+	      <section
+	        class="debug-mode-panel"
+	        id="inscription-debug-panel"
+	        role="tabpanel"
+	        aria-labelledby="inscription-debug-tab"
+	        data-debug-panel="inscription"
+	        hidden
+	      >
+	        <section class="battle-debug-layout inscription-debug-layout">
+	          <section class="panel battle-main-panel inscription-main-panel" aria-label="铭文调校">
+	            <div class="panel-head">
+	              <div>
+	                <h2>铭文调校</h2>
+	                <small id="inscription-current-summary">选择一把刃，或从锻造调校导入。</small>
+	              </div>
+	            </div>
+
+	            <article class="battle-card inscription-host-card">
+	              <div class="section-title">
+	                <h3>当前刃</h3>
+	                <small>铭文与战斗工具箱共用同一把刃</small>
+	              </div>
+	              <div id="inscription-blade-summary" class="battle-state-grid empty-state">选择或新建一把刃。</div>
+	            </article>
+
+	            <article class="battle-card inscription-card">
+		              <div class="section-title compact-head">
+		                <div>
+		                  <h3>铭文编辑</h3>
+		                  <small>7 顶点 / 12 边；先选金属丝，再在边上描线。当前默认每条边数量为 1。</small>
+		                </div>
+		              </div>
+		              <div class="inscription-workspace">
+		                <section class="inscription-graph-panel" aria-label="铭文结构图">
+		                  <div class="inscription-wire-tray" id="inscription-wire-tray" aria-label="铭文金属丝"></div>
+		                  <div class="inscription-graph" id="inscription-graph"></div>
+		                </section>
+		                <section class="inscription-preview-panel" aria-label="铭文解读与效果">
+		                  <div class="section-title">
+		                    <h3>解读</h3>
+		                    <small>实时解析</small>
+		                  </div>
+		                  <div id="inscription-price-output" class="inscription-output empty-state">选择刃后显示解读。</div>
+	                  <div class="section-title">
+	                    <h3>效果</h3>
+	                    <small>实时生成</small>
+	                  </div>
+	                  <div id="inscription-effect-output" class="inscription-output empty-state">选择刃后显示效果。</div>
+	                </section>
+	              </div>
+	            </article>
+	          </section>
+
+	          <aside class="panel battle-toolbox-panel" aria-label="铭文刃工具箱">
+	            <div class="panel-head">
+	              <div>
+	                <h2>刃工具箱</h2>
+	                <small id="inscription-toolbox-summary">本地保存 · 与战斗调校共用</small>
+	              </div>
+	            </div>
+
+	            <div class="toolbox-actions">
+	              <button class="primary-action" id="inscription-import-forge-button" type="button">导入锻造结果</button>
+	              <button class="secondary-action" id="inscription-new-blade-button" type="button">新建刃</button>
+	              <button class="secondary-action" id="inscription-duplicate-blade-button" type="button">复制副本</button>
+	              <button class="secondary-action" id="inscription-rename-blade-button" type="button">重新命名</button>
+	              <button class="secondary-action danger-action" id="inscription-delete-blade-button" type="button">删除</button>
+	              <button class="secondary-action danger-action" id="inscription-delete-selected-button" type="button">删除多选</button>
+	            </div>
+
+	            <div id="inscription-toolbox-list" class="battle-toolbox-list empty-state">暂无刃。</div>
+	          </aside>
+	        </section>
+	      </section>
+	    </main>
+
+    <script src="../游戏本体/forgingFormula.js"></script>
+    <script src="../游戏本体/bladeNaming.js"></script>
+    <script src="../游戏本体/battleFormula.js"></script>
+    <script src="./forging-debug.js"></script>
+  </body>
+</html>

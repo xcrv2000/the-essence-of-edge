@@ -1,0 +1,1834 @@
+:root {
+  color-scheme: dark;
+  --bg: #0a0a0a;
+  --panel: #111;
+  --panel-2: #181818;
+  --panel-3: #202020;
+  --line: #303030;
+  --line-strong: #e8e8e8;
+  --text: #f3f3f3;
+  --muted: #a2a2a2;
+  --muted-2: #707070;
+  --inverse: #090909;
+  --accent: #f0b35a;
+  --accent-2: #72d6d0;
+  --danger: #ff7474;
+  --radius: 7px;
+  --shadow: 0 18px 60px rgba(0, 0, 0, 0.34);
+  font-family:
+    "Noto Sans SC",
+    "Microsoft YaHei",
+    "PingFang SC",
+    sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.35;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-width: 1180px;
+  min-height: 100%;
+  margin: 0;
+  background: var(--bg);
+}
+
+body {
+  overflow: auto;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+.debug-shell {
+  min-height: 100vh;
+  padding: 22px;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 14px;
+}
+
+.debug-header {
+  min-height: 72px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.debug-header p,
+.panel-head small,
+.section-title small,
+.message-line,
+.empty-state,
+label span,
+td small {
+  color: var(--muted);
+}
+
+.debug-header p,
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+.debug-header p {
+  font-size: 0.78rem;
+}
+
+h1 {
+  margin-top: 2px;
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+h2 {
+  font-size: 1rem;
+  line-height: 1.15;
+}
+
+h3 {
+  font-size: 0.82rem;
+  line-height: 1.15;
+  color: var(--muted);
+}
+
+.header-note {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--accent-2);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.debug-workspace {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 360px minmax(720px, 1fr);
+  gap: 14px;
+}
+
+.panel {
+  min-width: 0;
+  min-height: 0;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.input-panel,
+.formula-panel {
+  align-content: start;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.formula-panel {
+  grid-template-rows: auto auto auto auto auto auto minmax(0, 1fr);
+}
+
+.panel-head,
+.section-title {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.compact-head {
+  align-items: end;
+}
+
+.button-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.panel-head small {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.75rem;
+}
+
+.primary-action,
+.secondary-action {
+  min-height: 38px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--text);
+  color: var(--inverse);
+  font-weight: 800;
+}
+
+.secondary-action {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.mini-action {
+  min-height: 30px;
+  padding: 0 9px;
+  font-size: 0.72rem;
+}
+
+.danger-action {
+  border-color: color-mix(in srgb, var(--danger), var(--line) 45%);
+  color: var(--danger);
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+.metal-input-grid,
+.constraint-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.metal-input-row,
+.constraint-row {
+  min-height: 48px;
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #080808;
+}
+
+.workspace-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #080808;
+}
+
+.workspace-tab {
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.workspace-tab.is-active {
+  border-color: var(--line);
+  background: var(--panel-3);
+  color: var(--text);
+}
+
+.debug-mode-panel {
+  min-height: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.debug-mode-panel[data-debug-panel="forging"] {
+  grid-template-rows: minmax(680px, 1fr) minmax(220px, 32vh);
+}
+
+.debug-mode-panel[hidden] {
+  display: none;
+}
+
+.mode-tab {
+  min-height: 36px;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.mode-tab.is-active {
+  border-color: var(--line);
+  background: var(--panel-3);
+  color: var(--text);
+}
+
+.input-mode-panel {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.input-mode-panel[hidden] {
+  display: none;
+}
+
+.metal-input-row {
+  grid-template-columns: 42px minmax(0, 1fr);
+  padding: 7px 8px;
+}
+
+.constraint-row {
+  grid-template-columns: 36px minmax(0, 1fr) minmax(0, 1fr);
+  padding: 7px;
+}
+
+.metal-input-row strong,
+.constraint-row strong {
+  font-size: 0.86rem;
+}
+
+input,
+select {
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #080808;
+  color: var(--text);
+}
+
+input[type="number"] {
+  text-align: right;
+}
+
+.simulation-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+label {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+label span {
+  font-size: 0.7rem;
+}
+
+.button-row {
+  display: grid;
+}
+
+.quick-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.analysis-panel {
+  padding: 9px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.analysis-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  gap: 7px;
+}
+
+.analysis-controls label:last-child {
+  grid-column: 1 / -1;
+}
+
+.simulation-condition-head {
+  min-width: 0;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.simulation-condition-head strong,
+.simulation-condition-head small {
+  min-width: 0;
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.simulation-condition-head strong {
+  font-size: 0.76rem;
+}
+
+.simulation-condition-head small {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.simulation-condition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.simulation-condition-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #080808;
+}
+
+.simulation-condition-row strong {
+  min-width: 0;
+  color: var(--text);
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.simulation-condition-control {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 5px;
+}
+
+.simulation-condition-control select,
+.simulation-condition-control input {
+  min-height: 30px;
+  padding: 4px 6px;
+  font-size: 0.72rem;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.quick-grid button {
+  min-height: 34px;
+  padding: 0 8px;
+  font-size: 0.76rem;
+}
+
+.formula-card {
+  min-height: 150px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #070707;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+pre {
+  margin: 0;
+}
+
+code,
+.mono {
+  font-family:
+    "Cascadia Mono",
+    "Consolas",
+    monospace;
+}
+
+code {
+  color: var(--accent);
+  font-size: 0.77rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.tables-grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tables-grid article,
+.result-panel,
+.constraint-section,
+.performance-panel,
+.curve-panel,
+.entropy-panel {
+  min-height: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.curve-panel {
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.curve-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.curve-help {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.constraint-section.is-disabled {
+  opacity: 0.54;
+}
+
+.constraint-section.is-disabled input {
+  cursor: not-allowed;
+}
+
+.table-head {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 6px;
+}
+
+.table-wrap,
+.result-body,
+.simulation-result,
+.forge-log {
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+}
+
+th,
+td {
+  padding: 6px 7px;
+  border: 1px solid var(--line);
+  text-align: right;
+  vertical-align: top;
+}
+
+th:first-child,
+td:first-child {
+  text-align: left;
+}
+
+th {
+  color: var(--accent-2);
+  background: #0b0b0b;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+td {
+  background: var(--panel-2);
+}
+
+.editable-matrix td {
+  padding: 4px;
+}
+
+.editable-matrix th:first-child,
+.editable-matrix td:first-child {
+  width: 42px;
+}
+
+.matrix-input {
+  min-height: 30px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  font-size: 0.72rem;
+}
+
+.matrix-check {
+  color: var(--accent);
+  font-size: 0.72rem;
+}
+
+.performance-matrix th,
+.performance-matrix td,
+.entropy-matrix th,
+.entropy-matrix td {
+  text-align: center;
+}
+
+.performance-matrix,
+.entropy-matrix {
+  table-layout: fixed;
+}
+
+.performance-matrix th:first-child,
+.performance-matrix td:first-child,
+.entropy-matrix th:first-child,
+.entropy-matrix td:first-child {
+  width: auto;
+}
+
+.performance-matrix .matrix-input,
+.entropy-matrix .matrix-input {
+  text-align: center;
+}
+
+.result-body,
+.simulation-result {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.summary-strip span {
+  min-height: 30px;
+  padding: 5px 8px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.export-battle-action {
+  min-height: 30px;
+  white-space: nowrap;
+}
+
+.result-section-title {
+  align-items: end;
+}
+
+.leaderboard-section,
+.filter-result-card {
+  display: grid;
+  gap: 8px;
+}
+
+.leaderboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.leaderboard-card {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.leaderboard-head {
+  min-width: 0;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.leaderboard-head strong,
+.leaderboard-head small {
+  min-width: 0;
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.leaderboard-head small {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.compact-table,
+.filter-table {
+  max-height: 280px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.compact-table table,
+.filter-table table {
+  min-width: 760px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.radar-card {
+  min-height: 250px;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  overflow: hidden;
+}
+
+.radar-title {
+  min-width: 0;
+  padding-left: 14px;
+  display: grid;
+  gap: 4px;
+}
+
+.radar-title strong,
+.radar-title small {
+  display: block;
+}
+
+.radar-title small {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.radar-card svg {
+  width: 250px;
+  height: 250px;
+}
+
+.radar-ring,
+.radar-outer {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.radar-axis {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
+}
+
+.radar-shape {
+  fill: rgba(240, 179, 90, 0.28);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.radar-dot {
+  fill: var(--accent-2);
+  stroke: #050505;
+  stroke-width: 1.2;
+}
+
+.radar-label {
+  fill: var(--muted);
+  font-size: 10px;
+  dominant-baseline: middle;
+}
+
+.violin-card {
+  min-height: 370px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  overflow: hidden;
+}
+
+.violin-title {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.violin-title strong,
+.violin-title small {
+  display: block;
+}
+
+.violin-title small {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.violin-card svg {
+  width: 100%;
+  min-height: 320px;
+}
+
+.violin-grid-line {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+}
+
+.violin-axis-label,
+.violin-label,
+.violin-mean-label {
+  fill: var(--muted);
+  font-size: 12px;
+  dominant-baseline: middle;
+}
+
+.violin-label {
+  fill: var(--accent-2);
+  font-weight: 800;
+}
+
+.violin-mean-label {
+  font-size: 10px;
+}
+
+.violin-range {
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.violin-shape {
+  fill: rgba(114, 214, 208, 0.2);
+  stroke: var(--accent-2);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.violin-mean {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.stat-tile {
+  min-width: 0;
+  min-height: 70px;
+  padding: 9px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.stat-tile small {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.stat-tile strong {
+  color: var(--text);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+details {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+summary {
+  min-height: 36px;
+  padding: 8px 10px;
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+details .table-wrap {
+  max-height: 260px;
+  border-top: 1px solid var(--line);
+}
+
+.message-line {
+  min-height: 18px;
+  font-size: 0.75rem;
+}
+
+.message-line.is-error {
+  color: var(--danger);
+}
+
+.empty-state {
+  padding: 12px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 0.78rem;
+}
+
+.log-panel {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.forge-log {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+}
+
+.log-entry {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  overflow: hidden;
+}
+
+.log-entry-head {
+  min-height: 44px;
+  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.log-entry-head strong,
+.log-entry-head small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.log-entry-head small {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.log-entry-body {
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.simulation-samples {
+  display: grid;
+  gap: 6px;
+}
+
+.battle-debug-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(760px, 1fr) 360px;
+  gap: 14px;
+}
+
+.battle-main-panel,
+.battle-toolbox-panel {
+  align-content: start;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.battle-main-panel {
+  grid-template-rows: auto auto auto auto;
+}
+
+.inscription-main-panel {
+  grid-template-rows: auto auto minmax(0, auto);
+}
+
+.battle-status-pill {
+  min-width: 64px;
+  min-height: 30px;
+  padding: 5px 10px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.battle-status-pill.is-active {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+}
+
+.battle-control-grid,
+.battle-output-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.battle-card {
+  min-width: 0;
+  padding: 10px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.battle-wide-card {
+  grid-column: 1 / -1;
+}
+
+.battle-form-grid,
+.battle-stat-editor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.battle-stat-editor {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.compact-form-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.battle-form-grid label,
+.battle-stat-input,
+.battle-textarea-field {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.battle-form-grid span,
+.battle-stat-input span,
+.battle-textarea-field span,
+.toggle-line span {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.battle-form-grid input,
+.battle-form-grid select,
+.battle-stat-input input,
+.battle-textarea-field textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #0b0b0b;
+  color: var(--text);
+}
+
+.battle-stat-input {
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #111;
+}
+
+.battle-stat-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 5px;
+}
+
+.battle-textarea-field textarea {
+  min-height: 90px;
+  resize: vertical;
+  font-family: "Consolas", "SFMono-Regular", monospace;
+  font-size: 0.74rem;
+}
+
+.battle-enemy-current {
+  min-width: 0;
+  padding: 9px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(114, 214, 208, 0.34);
+  border-radius: var(--radius);
+  background: rgba(114, 214, 208, 0.08);
+}
+
+.battle-enemy-current-head,
+.battle-enemy-hp-row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.battle-enemy-current-head strong,
+.battle-enemy-hp-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.battle-enemy-current-head small {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.battle-enemy-hp-meter {
+  width: min(48%, 180px);
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #0b0b0b;
+}
+
+.battle-enemy-hp-meter span {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: var(--accent-2);
+  transition: width 160ms ease;
+}
+
+.battle-enemy-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.battle-enemy-generator-output {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.battle-enemy-generated-line {
+  min-width: 0;
+  padding: 8px;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #111;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.maintenance-card {
+  grid-template-columns: minmax(140px, 0.7fr) auto minmax(320px, 1.6fr) auto;
+  align-items: center;
+}
+
+.maintenance-card .battle-form-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.battle-k-help,
+.battle-formula-preview {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.battle-k-help {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.battle-k-item,
+.battle-formula-line {
+  min-width: 0;
+  padding: 8px;
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #111;
+}
+
+.battle-k-head,
+.battle-formula-head {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.battle-k-head strong,
+.battle-formula-head strong,
+.battle-formula-result {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.battle-k-item small,
+.battle-formula-line small {
+  color: var(--muted);
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.battle-k-item code,
+.battle-formula-line code {
+  min-width: 0;
+  padding: 5px 6px;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #0b0b0b;
+  color: var(--accent-2);
+  font-family: "Consolas", "SFMono-Regular", monospace;
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+
+.battle-formula-result {
+  color: var(--accent-2);
+}
+
+.toggle-line {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.toggle-line input {
+  width: 18px;
+  height: 18px;
+}
+
+.battle-action-bar,
+.toolbox-actions {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.battle-action-bar button,
+.toolbox-actions button {
+  min-width: 0;
+  padding-right: 8px;
+  padding-left: 8px;
+  overflow-wrap: anywhere;
+}
+
+.toolbox-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.battle-state-output,
+.battle-lifetime-output,
+.battle-rule-output,
+.battle-log {
+  min-height: 0;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.battle-state-grid,
+.battle-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.battle-summary-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.battle-mini-stat {
+  min-width: 0;
+  padding: 8px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #111;
+}
+
+.battle-mini-stat span,
+.battle-mini-stat small {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.battle-mini-stat strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.battle-radar-output,
+.battle-editor-radar {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+}
+
+.battle-editor-radar {
+  min-height: 240px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #111;
+}
+
+.battle-radar-output svg,
+.battle-editor-radar svg {
+  width: min(100%, 360px);
+  aspect-ratio: 1;
+}
+
+.battle-editor-radar svg {
+  width: min(100%, 300px);
+}
+
+.battle-radar-grid {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.battle-radar-axis {
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 1;
+}
+
+.battle-radar-max {
+  fill: rgba(255, 255, 255, 0.08);
+  stroke: rgba(255, 255, 255, 0.42);
+  stroke-width: 1.5;
+}
+
+.battle-radar-current {
+  fill: rgba(114, 214, 208, 0.22);
+  stroke: var(--accent-2);
+  stroke-width: 2;
+}
+
+.battle-radar-label {
+  fill: var(--muted);
+  font-size: 9px;
+  text-anchor: middle;
+}
+
+.battle-log {
+  max-height: 360px;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.battle-log-entry {
+  min-width: 0;
+  padding: 8px;
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #111;
+}
+
+.battle-log-entry strong,
+.battle-log-entry small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.battle-log-entry small,
+.battle-rule-section li {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.battle-rule-section {
+  display: grid;
+  gap: 5px;
+}
+
+.battle-rule-section ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.battle-toolbox-list {
+  min-height: 420px;
+  max-height: calc(100vh - 280px);
+  overflow: auto;
+  scrollbar-width: thin;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.battle-toolbox-item {
+  min-width: 0;
+  padding: 9px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.battle-toolbox-item.is-selected {
+  border-color: var(--accent-2);
+  background: color-mix(in srgb, var(--panel-2), var(--accent-2) 8%);
+}
+
+.battle-toolbox-item input {
+  margin-top: 3px;
+}
+
+.battle-toolbox-button {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.battle-toolbox-button strong,
+.battle-toolbox-button small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.battle-toolbox-button small {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.inscription-card {
+  gap: 12px;
+}
+
+.inscription-workspace {
+  display: grid;
+  grid-template-columns: minmax(330px, 0.95fr) minmax(300px, 1.05fr);
+  gap: 10px;
+}
+
+.inscription-graph-panel,
+.inscription-preview-panel,
+.inscription-output {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.inscription-graph-panel,
+.inscription-preview-panel {
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #111;
+}
+
+.inscription-wire-tray {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.inscription-wire-tool {
+  min-width: 0;
+  min-height: 46px;
+  padding: 7px 6px 6px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: #0a0a0a;
+  color: var(--text);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.inscription-wire-tool:hover,
+.inscription-wire-tool:focus-visible {
+  border-color: color-mix(in srgb, var(--wire-color), #ffffff 28%);
+  background: color-mix(in srgb, var(--wire-color), #050505 82%);
+  outline: none;
+}
+
+.inscription-wire-tool.is-selected {
+  border-color: color-mix(in srgb, var(--wire-color), #ffffff 40%);
+  background: color-mix(in srgb, var(--wire-color), #050505 74%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--wire-color), transparent 36%),
+    0 8px 22px rgba(0, 0, 0, 0.28);
+  transform: translateY(-1px);
+}
+
+.inscription-wire-strand {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), transparent 52%),
+    linear-gradient(90deg, color-mix(in srgb, var(--wire-color), #000 20%), var(--wire-color));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--wire-color), transparent 58%);
+}
+
+.inscription-wire-tool.is-erase .inscription-wire-strand {
+  height: 9px;
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.78) 0 7px, rgba(255, 255, 255, 0.12) 7px 14px),
+    #161616;
+  box-shadow: none;
+}
+
+.inscription-wire-label {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inscription-graph {
+  position: relative;
+  min-height: 380px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    #0b0b0b;
+  background-size: 24px 24px;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
+.inscription-graph.is-empty {
+  display: grid;
+  place-items: center;
+}
+
+.inscription-empty-note {
+  padding: 10px 12px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.78rem;
+}
+
+.inscription-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.inscription-edge-line {
+  stroke: rgba(255, 255, 255, 0.13);
+  stroke-linecap: round;
+  stroke-width: 2.4;
+  vector-effect: non-scaling-stroke;
+  transition:
+    stroke 140ms ease,
+    stroke-width 140ms ease,
+    opacity 140ms ease;
+}
+
+.inscription-edge-line.is-spoke {
+  opacity: 0.68;
+}
+
+.inscription-edge-line.is-filled {
+  stroke: var(--inscription-fill-color, var(--accent-2));
+  stroke-width: 5.4;
+  opacity: 1;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--inscription-fill-color, var(--accent-2)), transparent 34%));
+}
+
+.inscription-edge-hit {
+  stroke: transparent;
+  stroke-linecap: round;
+  stroke-width: 18;
+  cursor: crosshair;
+  pointer-events: stroke;
+  vector-effect: non-scaling-stroke;
+}
+
+.inscription-node-circle {
+  fill: #141414;
+  stroke: rgba(255, 255, 255, 0.44);
+  stroke-width: 1.8;
+  pointer-events: none;
+  vector-effect: non-scaling-stroke;
+  transition:
+    fill 140ms ease,
+    stroke 140ms ease,
+    stroke-width 140ms ease;
+}
+
+.inscription-node-circle.is-center {
+  stroke: rgba(240, 179, 90, 0.68);
+  stroke-width: 2.2;
+}
+
+.inscription-summary-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.inscription-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.inscription-chip {
+  min-height: 28px;
+  padding: 5px 8px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #0b0b0b;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.inscription-chip.is-empty {
+  color: var(--muted);
+}
+
+.inscription-chip.is-main {
+  border-color: color-mix(in srgb, var(--accent), #ffffff 18%);
+  color: var(--accent);
+  background: rgba(240, 179, 90, 0.08);
+}
+
+.inscription-interpretation {
+  display: grid;
+  gap: 8px;
+}
+
+.inscription-interpretation-section {
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.inscription-interpretation-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.inscription-interpretation-head h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.inscription-interpretation-head small {
+  color: var(--muted);
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.inscription-chain-readout,
+.inscription-face-details {
+  display: grid;
+  gap: 7px;
+}
+
+.inscription-branch-list {
+  display: grid;
+  gap: 6px;
+}
+
+.inscription-branch-item {
+  min-width: 0;
+  padding: 7px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  background: #0b0b0b;
+}
+
+.inscription-branch-item strong {
+  color: var(--text);
+  font-size: 0.74rem;
+}
+
+.inscription-branch-item small,
+.inscription-branch-metals {
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.inscription-correction-list,
+.inscription-face-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.inscription-face-readout {
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+}
+
+.inscription-face-map {
+  width: 118px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: #090909;
+}
+
+.inscription-face-sector {
+  fill: rgba(255, 255, 255, 0.035);
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 0.55;
+  transition:
+    fill 140ms ease,
+    opacity 140ms ease;
+}
+
+.inscription-face-sector.is-selected {
+  fill: color-mix(in srgb, var(--face-color), transparent 22%);
+  opacity: 0.92;
+}
+
+.inscription-face-map-line {
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 0.75;
+  vector-effect: non-scaling-stroke;
+}
+
+.inscription-effect-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.inscription-effect-list li {
+  color: var(--muted);
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 1320px) {
+  html,
+  body {
+    min-width: 1024px;
+  }
+
+  .debug-workspace {
+    grid-template-columns: 320px minmax(640px, 1fr);
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .battle-debug-layout {
+    grid-template-columns: minmax(660px, 1fr) 320px;
+  }
+
+  .battle-action-bar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .inscription-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .inscription-wire-tray {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .inscription-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
