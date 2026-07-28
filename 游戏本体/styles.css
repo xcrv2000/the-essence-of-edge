@@ -908,8 +908,7 @@ h3 {
   justify-items: center;
   align-content: start;
   gap: var(--epilogue-gap);
-  overflow-y: auto;
-  scrollbar-width: thin;
+  overflow: hidden;
 }
 
 .inscription-epilogue-text {
@@ -929,6 +928,7 @@ h3 {
 
 .inscription-epilogue-text p {
   margin: 0;
+  white-space: pre-line;
 }
 
 .inscription-epilogue-button {
@@ -939,9 +939,14 @@ h3 {
 
 .w7-wheel-hint {
   width: var(--w7-wheel-size);
+  height: var(--w7-wheel-size);
   aspect-ratio: 1;
   display: grid;
   place-items: center;
+}
+
+.inscription-epilogue.is-wheel-collapsed .w7-wheel-hint {
+  display: none;
 }
 
 .w7-wheel-hint svg {
@@ -1701,7 +1706,6 @@ h3 {
   width: clamp(86px, 22vw, 150px);
   max-width: 100%;
   align-self: start;
-  transform: translateY(-2px);
 }
 
 .blade-radar-grid {
@@ -2436,10 +2440,22 @@ textarea::placeholder {
 }
 
 @media (max-height: 760px) {
+  .inscription-epilogue {
+    --epilogue-gap: clamp(8px, 2dvh, 12px);
+    padding: 8px 12px 10px;
+  }
+
+  .inscription-epilogue-text {
+    padding: 12px;
+    gap: 7px;
+    font-size: 0.78rem;
+    line-height: 1.52;
+  }
+
   .metallurgy-station[data-station="forging"] .metallurgy-drawer.is-open .drawer-body {
     grid-template-rows:
       auto
-      minmax(92px, 118px)
+      minmax(104px, 118px)
       minmax(var(--ingredient-zone-height), var(--ingredient-zone-height));
   }
 
@@ -2462,7 +2478,7 @@ textarea::placeholder {
   }
 
   .metallurgy-station[data-station="forging"] .blade-detail-body {
-    grid-template-columns: minmax(0, 1fr) clamp(92px, 16vh, 118px);
+    grid-template-columns: minmax(0, 1fr) clamp(74px, 12vh, 88px);
     align-items: start;
     gap: 4px;
   }
@@ -2480,9 +2496,8 @@ textarea::placeholder {
   }
 
   .metallurgy-station[data-station="forging"] .blade-radar {
-    width: clamp(92px, 16vh, 118px);
+    width: clamp(74px, 12vh, 88px);
     max-width: none;
-    margin-top: -9px;
   }
 
   .metallurgy-station[data-station="forging"] .blade-meta-panel {
@@ -2493,6 +2508,18 @@ textarea::placeholder {
 @media (max-height: 600px) {
   .app-shell {
     gap: 8px;
+  }
+
+  .inscription-epilogue {
+    --epilogue-gap: 8px;
+    padding: 6px 10px 8px;
+  }
+
+  .inscription-epilogue-text {
+    padding: 10px;
+    gap: 5px;
+    font-size: 0.72rem;
+    line-height: 1.46;
   }
 
   .title-bar {

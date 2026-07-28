@@ -32,8 +32,9 @@ const BATTLE_ATTRIBUTE_NOTES = [
 const INSCRIPTION_EPILOGUE_TEXT = [
   "你已经来到了本版本的终点。如果你发现打CR6或更高的怪物很困难，这是正常的。",
   "你可以继续探索冶炼与锻造的规律，也可以随便挂着等版本更新。",
-  "感谢游玩，以及敬请期待！（如果有人期待的话）",
+  "感谢游玩，以及敬请期待！\n（如果有人期待的话）",
 ];
+const INSCRIPTION_WHEEL_MAX_SIZE = 220;
 const ACTION_COOLDOWN_IDS = ["sulfurMine", "smelting", "forging", "battleFlee"];
 const PROCESS_ACTION_LABELS = {
   smelting: "冶炼",
@@ -323,6 +324,7 @@ let lastPassiveRenderAt = 0;
 let lastPassiveAutosaveCheckAt = 0;
 let cooldownWasActive = false;
 let lastAdvanceCompletedOperations = 0;
+let inscriptionEpilogueLayoutFrame = 0;
 const collapsedResearchSections = {
   available: false,
   owned: false,
@@ -1457,6 +1459,13 @@ function canAfford(cost) {
   return Object.entries(cost).every(([resource, amount]) => state.resources[resource] >= amount);
 }
 
+function getUnaffordableResources(cost) {
+  return Object.entries(cost)
+    .filter(([, amount]) => Math.floor(Number(amount) || 0) > 0)
+    .filter(([resource, amount]) => Math.floor(Number(state.resources[resource]) || 0) < Math.floor(Number(amount) || 0))
+    .map(([resource]) => resource);
+}
+
 function formatNumber(value) {
   const number = Math.max(0, Number(value) || 0);
   const whole = Math.floor(number);
@@ -2157,17 +2166,22 @@ function changeIngredient(station, action) {
 }
 
 function flashResourceIndicator(resource) {
-  if (!resource) {
-    return;
-  }
+  flashResourceIndicators([resource]);
+}
 
-  $$(`[data-resource-indicator="${resource}"]`).forEach((element) => {
-    element.classList.remove("is-flashing");
-    void element.offsetWidth;
-    element.classList.add("is-flashing");
-    window.setTimeout(() => {
+function flashResourceIndicators(resources) {
+  const resourceList = Array.isArray(resources) ? resources : [resources];
+  const uniqueResources = [...new Set(resourceList.filter(Boolean))];
+
+  uniqueResources.forEach((resource) => {
+    $$(`[data-resource-indicator="${resource}"]`).forEach((element) => {
       element.classList.remove("is-flashing");
-    }, 900);
+      void element.offsetWidth;
+      element.classList.add("is-flashing");
+      window.setTimeout(() => {
+        element.classList.remove("is-flashing");
+      }, 900);
+    });
   });
 }
 
@@ -2322,6 +2336,7 @@ function reproduceStationInputs(station, sourceInputs) {
   if (!canAfford(recipeInputs)) {
     addLog(`再生产需要 ${formatResourceBundle(recipeInputs)}。`);
     render();
+    flashResourceIndicators(getUnaffordableResources(recipeInputs));
     return;
   }
 
@@ -2367,6 +2382,7 @@ function setMetallurgyStation(station) {
 
   metallurgyUi.activeStation = station;
   renderMetallurgyTabs();
+  scheduleInscriptionEpilogueLayout();
 }
 
 function acceptInscriptionEpilogue() {
@@ -3799,6 +3815,55 @@ function createW7WheelNode(point, isCenter) {
   });
 }
 
+function scheduleInscriptionEpilogueLayout() {
+  if (typeof window.requestAnimationFrame !== "function") {
+    adjustInscriptionEpilogueLayout();
+    return;
+  }
+  if (inscriptionEpilogueLayoutFrame) {
+    window.cancelAnimationFrame(inscriptionEpilogueLayoutFrame);
+  }
+  inscriptionEpilogueLayoutFrame = window.requestAnimationFrame(adjustInscriptionEpilogueLayout);
+}
+
+function adjustInscriptionEpilogueLayout() {
+  inscriptionEpilogueLayoutFrame = 0;
+  const content = elements.inscriptionPanel?.querySelector(".inscription-epilogue");
+  if (!content || !state.unlockedFeatures.inscription) {
+    return;
+  }
+
+  const computed = window.getComputedStyle(content);
+  if (computed.display === "none" || content.clientHeight <= 0) {
+    return;
+  }
+
+  const textBox = content.querySelector(".inscription-epilogue-text");
+  if (!textBox) {
+    return;
+  }
+
+  const contentWidth =
+    content.clientWidth - readPixelValue(computed.paddingLeft) - readPixelValue(computed.paddingRight);
+  const contentHeight =
+    content.clientHeight -
+    readPixelValue(computed.paddingTop) -
+    readPixelValue(computed.paddingBottom);
+  const remainingHeight = contentHeight - textBox.offsetHeight - readPixelValue(computed.rowGap || computed.gap);
+  const wheelSize = Math.max(
+    0,
+    Math.floor(Math.min(INSCRIPTION_WHEEL_MAX_SIZE, contentWidth, remainingHeight)),
+  );
+
+  content.style.setProperty("--w7-wheel-size", `${wheelSize}px`);
+  content.classList.toggle("is-wheel-collapsed", wheelSize <= 0);
+}
+
+function readPixelValue(value) {
+  const number = parseFloat(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
 function renderIngredientStation(station) {
   const listElement =
     station === "forging" ? elements.forgingResourceList : elements.smeltingResourceList;
@@ -4594,6 +4659,7 @@ function render() {
   renderStats();
   renderMilestones();
   maybeShowForgedBladeDetails();
+  scheduleInscriptionEpilogueLayout();
 }
 
 function renderActionCooldownState() {
@@ -4889,6 +4955,11 @@ function setSettingsMessage(message) {
 }
 
 function bindEvents() {
+  window.addEventListener("resize", scheduleInscriptionEpilogueLayout);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", scheduleInscriptionEpilogueLayout);
+  }
+
   $$(".tab-button, .settings-shortcut").forEach((button) => {
     button.addEventListener("click", () => {
       setScreen(button.dataset.target);
