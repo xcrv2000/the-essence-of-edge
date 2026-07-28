@@ -15,6 +15,26 @@
     });
   }
 
+  function buildScaledSingleEffectLevels({
+    baseCost,
+    costResource,
+    effectId,
+    baseEffect,
+    maxLevel,
+    costMultiplier = 2,
+    effectMultiplier = 3,
+  }) {
+    return Array.from({ length: maxLevel }, (_, index) => ({
+      level: index + 1,
+      cost: {
+        [costResource]: Math.floor(baseCost * Math.pow(costMultiplier, index)),
+      },
+      effects: {
+        [effectId]: Math.floor(baseEffect * Math.pow(effectMultiplier, index)),
+      },
+    }));
+  }
+
   function buildMercuryFracturingLevels() {
     const effects = [
       { mercuryCost: 2, sulfurBonus: 1 },
@@ -326,48 +346,40 @@
       {
         id: "mercury-condenser-upgrade-1",
         name: "汞冷凝器升级 I",
-        description: "强化汞冷凝器。汞冷凝器每秒钟额外获取 10 汞。",
+        description: "强化汞冷凝器。每级价格翻倍，单级汞收益变为上一级的 3 倍。",
         unlockAt: "汞汇聚达到 7 级",
         unlockRule: {
           type: "researchLevel",
           researchId: "mercury-convergence",
           level: 7,
         },
-        maxLevel: 1,
-        levels: [
-          {
-            level: 1,
-            cost: {
-              mercury: 100,
-            },
-            effects: {
-              mercuryPerSecond: 10,
-            },
-          },
-        ],
+        maxLevel: 3,
+        levels: buildScaledSingleEffectLevels({
+          baseCost: 100,
+          costResource: "mercury",
+          effectId: "mercuryPerSecond",
+          baseEffect: 10,
+          maxLevel: 3,
+        }),
       },
       {
         id: "sulfur-deposit-upgrade-1",
         name: "硫矿床升级 I",
-        description: "强化硫矿床。硫矿床每次点击额外获取 10 硫。",
+        description: "强化硫矿床。每级价格翻倍，单级硫收益变为上一级的 3 倍。",
         unlockAt: "硫富集达到 7 级",
         unlockRule: {
           type: "researchLevel",
           researchId: "sulfur-enrichment",
           level: 7,
         },
-        maxLevel: 1,
-        levels: [
-          {
-            level: 1,
-            cost: {
-              sulfur: 100,
-            },
-            effects: {
-              sulfurPerClick: 10,
-            },
-          },
-        ],
+        maxLevel: 3,
+        levels: buildScaledSingleEffectLevels({
+          baseCost: 100,
+          costResource: "sulfur",
+          effectId: "sulfurPerClick",
+          baseEffect: 10,
+          maxLevel: 3,
+        }),
       },
       {
         id: "mercury-fracturing",

@@ -38,15 +38,12 @@ const INSCRIPTION_WHEEL_MAX_SIZE = 220;
 const NOTE_DIRECTORY_PAGE = 0;
 const NOTE_GUIDE_PAGE = 1;
 const NOTE_FIRST_USER_PAGE = 2;
-const NOTE_GUIDE_TITLE = "使用说明与范例";
+const NOTE_GUIDE_TITLE = "使用说明";
 const NOTE_GUIDE_BODY = [
   "第 0 页是目录，会自动列出所有已有标题。",
   "第 1 页是这份说明。",
   "第 2 页开始可以自由记录。页面没有长度限制。",
   "下方按钮可以翻页、跳到最前或最后，也可以直接输入页码。",
-  "",
-  "范例标题：待确认",
-  "范例正文：把想回头验证的尝试、结果和猜想记在这里。",
 ].join("\n");
 const ACTION_COOLDOWN_IDS = ["sulfurMine", "smelting", "forging", "battleFlee"];
 const PROCESS_ACTION_LABELS = {
@@ -4330,12 +4327,12 @@ function renderProduct(element, noteElement, product, emptyTitle, emptyDetail) {
     const result = formatProductResult(product);
     const message = product.message || "冶炼成功。";
     title.textContent = result;
-    note = `${result}：${message}`;
+    note = message;
   } else if (product.type === "notice") {
     const name = product.name || "未反应";
     const message = product.message || "没有发生变化。";
     title.textContent = name;
-    note = `${name}：${message}`;
+    note = message;
   } else if (product.type === "blade") {
     title.textContent = product.name || "刃";
     title.title = buildBladeDetailsText(product);
@@ -4345,7 +4342,7 @@ function renderProduct(element, noteElement, product, emptyTitle, emptyDetail) {
   } else {
     const message = product.message || "没有属性，不进入资源或背包。";
     title.textContent = "垃圾";
-    note = `垃圾：${message}`;
+    note = message;
   }
 
   title.title = title.textContent;
