@@ -1,6 +1,6 @@
 const STORAGE_KEY = "blade-essence-save-v4";
 const GAME_VERSION = "1.0";
-const SAVE_VERSION = 14;
+const SAVE_VERSION = 15;
 const HOME_LOG_LIMIT = 100;
 const SMELTING_LOG_LIMIT = 100;
 const SMELTING_FAVORITE_LIMIT = 20;
@@ -35,6 +35,19 @@ const INSCRIPTION_EPILOGUE_TEXT = [
   "感谢游玩，以及敬请期待！\n（如果有人期待的话）",
 ];
 const INSCRIPTION_WHEEL_MAX_SIZE = 220;
+const NOTE_DIRECTORY_PAGE = 0;
+const NOTE_GUIDE_PAGE = 1;
+const NOTE_FIRST_USER_PAGE = 2;
+const NOTE_GUIDE_TITLE = "使用说明与范例";
+const NOTE_GUIDE_BODY = [
+  "第 0 页是目录，会自动列出所有已有标题。",
+  "第 1 页是这份说明。",
+  "第 2 页开始可以自由记录。页面没有长度限制。",
+  "下方按钮可以翻页、跳到最前或最后，也可以直接输入页码。",
+  "",
+  "范例标题：待确认",
+  "范例正文：把想回头验证的尝试、结果和猜想记在这里。",
+].join("\n");
 const ACTION_COOLDOWN_IDS = ["sulfurMine", "smelting", "forging", "battleFlee"];
 const PROCESS_ACTION_LABELS = {
   smelting: "冶炼",
@@ -295,10 +308,19 @@ const elements = {
   settingsMessage: $("#settings-message"),
   versionLabel: $("#version-label"),
   milestoneList: $("#milestone-list"),
+  noteEditor: $(".note-editor"),
+  noteTitle: $("#note-title"),
+  noteBody: $("#note-body"),
+  noteFirstButton: $("#note-first-button"),
+  notePrevButton: $("#note-prev-button"),
+  noteNextButton: $("#note-next-button"),
+  noteLastButton: $("#note-last-button"),
+  notePageInput: $("#note-page-input"),
 };
 
 const screenTitles = {
   home: "主页",
+  notes: "笔记",
   research: "研究",
   metallurgy: "冶金",
   battle: "战斗",
@@ -353,6 +375,9 @@ const metallurgyUi = {
 };
 const settingsUi = {
   activeTab: "settings",
+};
+const noteUi = {
+  saveTimer: 0,
 };
 const battleUi = {
   drawerOpen: false,
@@ -453,6 +478,7 @@ function createDefaultState() {
     metallurgy: createDefaultMetallurgyState(),
     meta: createDefaultMetaState(),
     battle: createDefaultBattleState(),
+    notes: createDefaultNotesState(),
     cooldowns: createDefaultCooldowns(),
     pendingOperations: createDefaultPendingOperations(),
     homeLog: ["汞冷凝器开始滴落汞。", "硫矿床可开采。"],
@@ -498,6 +524,13 @@ function createDefaultBattleState() {
     attacks: 0,
     hones: 0,
     lastImportantPauseReason: null,
+  };
+}
+
+function createDefaultNotesState() {
+  return {
+    currentPage: NOTE_GUIDE_PAGE,
+    pages: {},
   };
 }
 
@@ -586,6 +619,7 @@ function normalizeState(source) {
     metallurgy: normalizeMetallurgyState(safeSource.metallurgy, fallback.metallurgy),
     meta: normalizeMetaState(safeSource.meta, fallback.meta),
     battle: normalizeBattleState(safeSource.battle, fallback.battle),
+    notes: normalizeNotesState(safeSource.notes, fallback.notes),
     cooldowns: normalizeCooldowns(safeSource.cooldowns, fallback.cooldowns),
     pendingOperations: normalizePendingOperations(safeSource.pendingOperations, fallback.pendingOperations),
     homeLog: normalizeLog(safeSource.homeLog, fallback.homeLog),
@@ -1021,6 +1055,39 @@ function normalizeLog(value, fallback) {
     return [...fallback];
   }
   return value.filter((item) => typeof item === "string").slice(0, HOME_LOG_LIMIT);
+}
+
+function normalizeNotesState(source, fallback = createDefaultNotesState()) {
+  const safeSource = source && typeof source === "object" ? source : {};
+  const safePages = safeSource.pages && typeof safeSource.pages === "object" ? safeSource.pages : {};
+  const pages = {};
+
+  Object.entries(safePages).forEach(([key, page]) => {
+    const pageNumber = normalizeNotePageNumber(key, null);
+    if (pageNumber === null || pageNumber < NOTE_FIRST_USER_PAGE) {
+      return;
+    }
+
+    const safePage = page && typeof page === "object" ? page : {};
+    const title = typeof safePage.title === "string" ? safePage.title : "";
+    const body = typeof safePage.body === "string" ? safePage.body : "";
+    if (title.length || body.length) {
+      pages[String(pageNumber)] = { title, body };
+    }
+  });
+
+  return {
+    currentPage: normalizeNotePageNumber(safeSource.currentPage, fallback.currentPage),
+    pages,
+  };
+}
+
+function normalizeNotePageNumber(value, fallback = NOTE_GUIDE_PAGE) {
+  const number = Math.floor(Number(value));
+  if (!Number.isFinite(number) || number < 0) {
+    return fallback;
+  }
+  return Math.min(Number.MAX_SAFE_INTEGER, number);
 }
 
 function getResearchLevel(id) {
@@ -2727,7 +2794,7 @@ function renderNavigation() {
     button.classList.toggle("has-research-ready", target === "research" && visible && researchReady);
   });
 
-  $$(".tab-button, .settings-shortcut").forEach((button) => {
+  $$(".tab-button, .settings-shortcut, .notes-shortcut").forEach((button) => {
     const selected = button.dataset.target === activeScreen;
     button.classList.toggle("is-active", selected);
     button.setAttribute("aria-selected", String(selected));
@@ -2824,6 +2891,211 @@ function renderSettingsTabs() {
   elements.settingsPanels.forEach((panel) => {
     panel.classList.toggle("is-active", panel.dataset.settingsPanel === settingsUi.activeTab);
   });
+}
+
+function isEditableNotePage(pageNumber) {
+  return pageNumber >= NOTE_FIRST_USER_PAGE;
+}
+
+function getStoredNotePage(pageNumber) {
+  return state.notes?.pages?.[String(pageNumber)] || { title: "", body: "" };
+}
+
+function getEditableNotePage(pageNumber) {
+  if (!state.notes || typeof state.notes !== "object") {
+    state.notes = createDefaultNotesState();
+  }
+  if (!state.notes.pages || typeof state.notes.pages !== "object") {
+    state.notes.pages = {};
+  }
+
+  const key = String(pageNumber);
+  if (!state.notes.pages[key]) {
+    state.notes.pages[key] = { title: "", body: "" };
+  }
+  return state.notes.pages[key];
+}
+
+function hasStoredNotePageContent(page) {
+  return Boolean(page && ((page.title || "").trim() || (page.body || "").trim()));
+}
+
+function pruneEmptyNotePage(pageNumber) {
+  if (!isEditableNotePage(pageNumber) || !state.notes?.pages) {
+    return;
+  }
+  const key = String(pageNumber);
+  if (!hasStoredNotePageContent(state.notes.pages[key])) {
+    delete state.notes.pages[key];
+  }
+}
+
+function getStoredNotePageNumbers() {
+  const pages = state.notes?.pages && typeof state.notes.pages === "object" ? state.notes.pages : {};
+  return Object.entries(pages)
+    .map(([key, page]) => [normalizeNotePageNumber(key, null), page])
+    .filter(
+      ([pageNumber, page]) =>
+        pageNumber !== null && pageNumber >= NOTE_FIRST_USER_PAGE && hasStoredNotePageContent(page),
+    )
+    .map(([pageNumber]) => pageNumber)
+    .sort((a, b) => a - b);
+}
+
+function getLastNotePageNumber() {
+  const pageNumbers = getStoredNotePageNumbers();
+  return pageNumbers.reduce((lastPage, pageNumber) => Math.max(lastPage, pageNumber), NOTE_GUIDE_PAGE);
+}
+
+function getNoteTitleForDirectory(pageNumber) {
+  if (pageNumber === NOTE_DIRECTORY_PAGE) {
+    return "目录";
+  }
+  if (pageNumber === NOTE_GUIDE_PAGE) {
+    return NOTE_GUIDE_TITLE;
+  }
+
+  const title = getStoredNotePage(pageNumber).title.trim();
+  return title || "（未命名）";
+}
+
+function buildNoteDirectoryText() {
+  const pageNumbers = [NOTE_DIRECTORY_PAGE, NOTE_GUIDE_PAGE, ...getStoredNotePageNumbers()];
+  return pageNumbers.map((pageNumber) => `${pageNumber}　${getNoteTitleForDirectory(pageNumber)}`).join("\n");
+}
+
+function getCurrentNoteContent() {
+  if (!state.notes || typeof state.notes !== "object") {
+    state.notes = createDefaultNotesState();
+  }
+
+  const pageNumber = normalizeNotePageNumber(state.notes.currentPage, NOTE_GUIDE_PAGE);
+  state.notes.currentPage = pageNumber;
+
+  if (pageNumber === NOTE_DIRECTORY_PAGE) {
+    return {
+      pageNumber,
+      title: "目录",
+      body: buildNoteDirectoryText(),
+      readonly: true,
+    };
+  }
+
+  if (pageNumber === NOTE_GUIDE_PAGE) {
+    return {
+      pageNumber,
+      title: NOTE_GUIDE_TITLE,
+      body: NOTE_GUIDE_BODY,
+      readonly: true,
+    };
+  }
+
+  const page = getStoredNotePage(pageNumber);
+  return {
+    pageNumber,
+    title: page.title || "",
+    body: page.body || "",
+    readonly: false,
+  };
+}
+
+function renderNotes() {
+  if (!elements.noteEditor || !elements.noteTitle || !elements.noteBody || !elements.notePageInput) {
+    return;
+  }
+
+  const content = getCurrentNoteContent();
+  const pageKey = String(content.pageNumber);
+  const titlePageChanged = elements.noteTitle.dataset.notePage !== pageKey;
+  const bodyPageChanged = elements.noteBody.dataset.notePage !== pageKey;
+
+  if (titlePageChanged || document.activeElement !== elements.noteTitle) {
+    elements.noteTitle.value = content.title;
+  }
+  if (bodyPageChanged || document.activeElement !== elements.noteBody) {
+    elements.noteBody.value = content.body;
+  }
+
+  elements.noteTitle.dataset.notePage = pageKey;
+  elements.noteBody.dataset.notePage = pageKey;
+  elements.noteTitle.readOnly = content.readonly;
+  elements.noteBody.readOnly = content.readonly;
+  elements.noteEditor.classList.toggle("is-readonly", content.readonly);
+
+  if (document.activeElement !== elements.notePageInput) {
+    elements.notePageInput.value = pageKey;
+  }
+
+  const lastPage = getLastNotePageNumber();
+  if (elements.noteFirstButton) {
+    elements.noteFirstButton.disabled = content.pageNumber <= NOTE_DIRECTORY_PAGE;
+  }
+  if (elements.notePrevButton) {
+    elements.notePrevButton.disabled = content.pageNumber <= NOTE_DIRECTORY_PAGE;
+  }
+  if (elements.noteNextButton) {
+    elements.noteNextButton.disabled = content.pageNumber >= Number.MAX_SAFE_INTEGER;
+  }
+  if (elements.noteLastButton) {
+    elements.noteLastButton.disabled = content.pageNumber === lastPage;
+  }
+}
+
+function persistNotesSoon() {
+  if (noteUi.saveTimer) {
+    window.clearTimeout(noteUi.saveTimer);
+  }
+  noteUi.saveTimer = window.setTimeout(() => {
+    noteUi.saveTimer = 0;
+    persistSave("silent");
+  }, 300);
+}
+
+function flushNoteSave() {
+  if (!noteUi.saveTimer) {
+    return;
+  }
+
+  window.clearTimeout(noteUi.saveTimer);
+  noteUi.saveTimer = 0;
+  persistSave("silent");
+}
+
+function setNotePage(value) {
+  if (!state.notes || typeof state.notes !== "object") {
+    state.notes = createDefaultNotesState();
+  }
+
+  const pageNumber = normalizeNotePageNumber(value, state.notes.currentPage);
+  state.notes.currentPage = pageNumber;
+  renderNotes();
+  persistSave("silent");
+}
+
+function updateCurrentNoteTitle(value) {
+  const pageNumber = normalizeNotePageNumber(state.notes?.currentPage, NOTE_GUIDE_PAGE);
+  if (!isEditableNotePage(pageNumber)) {
+    renderNotes();
+    return;
+  }
+
+  const page = getEditableNotePage(pageNumber);
+  page.title = value;
+  pruneEmptyNotePage(pageNumber);
+  persistNotesSoon();
+}
+
+function updateCurrentNoteBody(value) {
+  const pageNumber = normalizeNotePageNumber(state.notes?.currentPage, NOTE_GUIDE_PAGE);
+  if (!isEditableNotePage(pageNumber)) {
+    renderNotes();
+    return;
+  }
+
+  const page = getEditableNotePage(pageNumber);
+  page.body = value;
+  pruneEmptyNotePage(pageNumber);
+  persistNotesSoon();
 }
 
 function renderStats() {
@@ -4643,6 +4915,7 @@ function render() {
   renderMetallurgy();
   renderBattle();
   renderNavigation();
+  renderNotes();
 
   if (elements.battleState) {
     elements.battleState.textContent = battleUnlocked ? "已解锁" : "未解锁";
@@ -4690,6 +4963,9 @@ function renderSulfurMineAction(rates, sulfurOutcome, now = Date.now()) {
 }
 
 function setScreen(screenName) {
+  if (activeScreen === "notes" && screenName !== "notes") {
+    flushNoteSave();
+  }
   activeScreen = screenTitles[screenName] && isScreenUnlocked(screenName) ? screenName : "home";
   renderScreens();
 
@@ -4886,6 +5162,7 @@ function decodeSave(code) {
 
 async function exportSave() {
   advancePassive();
+  flushNoteSave();
   persistSave("silent");
   const code = encodeSave(JSON.stringify(buildSavePayload()));
   elements.saveCode.value = code;
@@ -4956,15 +5233,67 @@ function setSettingsMessage(message) {
 
 function bindEvents() {
   window.addEventListener("resize", scheduleInscriptionEpilogueLayout);
+  window.addEventListener("beforeunload", flushNoteSave);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      flushNoteSave();
+    }
+  });
   if (window.visualViewport) {
     window.visualViewport.addEventListener("resize", scheduleInscriptionEpilogueLayout);
   }
 
-  $$(".tab-button, .settings-shortcut").forEach((button) => {
+  $$(".tab-button, .settings-shortcut, .notes-shortcut").forEach((button) => {
     button.addEventListener("click", () => {
       setScreen(button.dataset.target);
     });
   });
+
+  if (elements.noteFirstButton) {
+    elements.noteFirstButton.addEventListener("click", () => {
+      setNotePage(NOTE_DIRECTORY_PAGE);
+    });
+  }
+  if (elements.notePrevButton) {
+    elements.notePrevButton.addEventListener("click", () => {
+      setNotePage(normalizeNotePageNumber(state.notes?.currentPage, NOTE_GUIDE_PAGE) - 1);
+    });
+  }
+  if (elements.noteNextButton) {
+    elements.noteNextButton.addEventListener("click", () => {
+      setNotePage(normalizeNotePageNumber(state.notes?.currentPage, NOTE_GUIDE_PAGE) + 1);
+    });
+  }
+  if (elements.noteLastButton) {
+    elements.noteLastButton.addEventListener("click", () => {
+      setNotePage(getLastNotePageNumber());
+    });
+  }
+  if (elements.notePageInput) {
+    elements.notePageInput.addEventListener("change", () => {
+      setNotePage(elements.notePageInput.value);
+    });
+    elements.notePageInput.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") {
+        return;
+      }
+      event.preventDefault();
+      setNotePage(elements.notePageInput.value);
+      elements.notePageInput.blur();
+    });
+  }
+  if (elements.noteTitle) {
+    elements.noteTitle.addEventListener("input", () => {
+      updateCurrentNoteTitle(elements.noteTitle.value);
+    });
+    elements.noteTitle.addEventListener("blur", flushNoteSave);
+  }
+  if (elements.noteBody) {
+    elements.noteBody.addEventListener("input", () => {
+      updateCurrentNoteBody(elements.noteBody.value);
+    });
+    elements.noteBody.addEventListener("blur", flushNoteSave);
+  }
 
   elements.sulfurButton.addEventListener("click", mineSulfur);
   elements.smeltButton.addEventListener("click", () => {
@@ -5156,6 +5485,7 @@ function bindEvents() {
 
   elements.saveButton.addEventListener("click", () => {
     advancePassive();
+    flushNoteSave();
     persistSave("manual");
     render();
   });

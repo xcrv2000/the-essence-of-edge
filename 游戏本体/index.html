@@ -21,6 +21,16 @@
             <span class="resource-indicator" data-resource-indicator="salt"><strong id="title-salt">0</strong><small>盐</small></span>
           </div>
           <button
+            class="notes-shortcut"
+            id="notes-shortcut"
+            type="button"
+            data-target="notes"
+            aria-label="笔记"
+            aria-selected="false"
+          >
+            <span aria-hidden="true">书</span>
+          </button>
+          <button
             class="settings-shortcut"
             type="button"
             data-target="settings"
@@ -75,6 +85,29 @@
             </button>
 
             <ol class="event-log" id="home-log" aria-label="主页记录"></ol>
+          </div>
+        </section>
+
+        <section class="screen is-headless" data-screen="notes" aria-label="笔记">
+          <div class="notes-layout">
+            <section class="note-editor" aria-label="内置笔记">
+              <label class="note-title-row">
+                <span>标题</span>
+                <input id="note-title" type="text" autocomplete="off" placeholder="本页标题" />
+              </label>
+              <textarea id="note-body" spellcheck="false" placeholder="写下这一页的笔记"></textarea>
+            </section>
+
+            <nav class="note-controls" aria-label="笔记翻页">
+              <button class="secondary-action" id="note-first-button" type="button" aria-label="跳到第 0 页">|&lt;</button>
+              <button class="secondary-action" id="note-prev-button" type="button" aria-label="上一页">&lt;</button>
+              <label class="note-page-jump">
+                <span>页</span>
+                <input id="note-page-input" type="number" min="0" step="1" inputmode="numeric" value="1" />
+              </label>
+              <button class="secondary-action" id="note-next-button" type="button" aria-label="下一页">&gt;</button>
+              <button class="secondary-action" id="note-last-button" type="button" aria-label="跳到最后一页">&gt;|</button>
+            </nav>
           </div>
         </section>
 

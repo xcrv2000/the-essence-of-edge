@@ -78,6 +78,13 @@ button {
 }
 
 .title-copy p,
+.title-copy h1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title-copy p,
 .kicker,
 .resource-card span,
 .resource-card small,
@@ -191,7 +198,8 @@ h3 {
   }
 }
 
-.settings-shortcut {
+.settings-shortcut,
+.notes-shortcut {
   width: 44px;
   min-width: 44px;
   min-height: 44px;
@@ -203,15 +211,108 @@ h3 {
   color: var(--muted);
 }
 
-.settings-shortcut.is-active {
+.settings-shortcut.is-active,
+.notes-shortcut.is-active {
   border-color: var(--line-strong);
   background: var(--text);
   color: var(--inverse);
 }
 
-.settings-shortcut span {
+.settings-shortcut span,
+.notes-shortcut span {
   font-size: 1.05rem;
   line-height: 1;
+}
+
+@media (max-width: 430px) {
+  .title-bar {
+    gap: 8px;
+  }
+
+  .title-copy {
+    flex: 0 0 54px;
+  }
+
+  .title-actions,
+  .title-stats {
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .title-actions {
+    flex: 1 1 auto;
+  }
+
+  .title-stats {
+    flex: 1 1 0;
+  }
+
+  .title-stats span {
+    min-width: 0;
+    min-height: 42px;
+    flex: 1 1 0;
+    justify-content: center;
+    padding: 0 6px;
+  }
+
+  .title-stats strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.88rem;
+  }
+
+  .title-stats small {
+    font-size: 0.64rem;
+  }
+
+  .settings-shortcut,
+  .notes-shortcut {
+    width: 40px;
+    min-width: 40px;
+    min-height: 42px;
+  }
+}
+
+@media (max-width: 340px) {
+  .title-bar {
+    gap: 6px;
+  }
+
+  .title-copy {
+    flex-basis: 48px;
+  }
+
+  .title-actions,
+  .title-stats {
+    gap: 3px;
+  }
+
+  .title-stats span {
+    min-height: 40px;
+    padding: 0 4px;
+    gap: 2px;
+  }
+
+  .title-stats strong {
+    font-size: 0.8rem;
+  }
+
+  .title-stats small {
+    font-size: 0.58rem;
+  }
+
+  .settings-shortcut,
+  .notes-shortcut {
+    width: 36px;
+    min-width: 36px;
+    min-height: 40px;
+  }
+
+  .settings-shortcut span,
+  .notes-shortcut span {
+    font-size: 0.94rem;
+  }
 }
 
 .screen-stage {
@@ -265,6 +366,111 @@ h3 {
   align-content: start;
   overflow: auto;
   scrollbar-width: thin;
+}
+
+.notes-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.note-editor {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  overflow: hidden;
+}
+
+.note-title-row {
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.note-title-row span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.note-title-row input,
+.note-page-jump input {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  outline: none;
+}
+
+.note-title-row input {
+  width: 100%;
+  font-size: 0.98rem;
+  font-weight: 900;
+}
+
+.note-editor.is-readonly .note-title-row input,
+.note-editor.is-readonly textarea {
+  color: var(--muted);
+}
+
+#note-body {
+  min-height: 0;
+  height: 100%;
+  line-height: 1.52;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.note-controls {
+  min-height: 50px;
+  display: grid;
+  grid-template-columns: 42px 42px minmax(0, 1fr) 42px 42px;
+  gap: 6px;
+}
+
+.note-controls button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.note-page-jump {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 8px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.note-page-jump span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.note-page-jump input {
+  width: 100%;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  text-align: center;
 }
 
 .battle-layout {
@@ -383,7 +589,10 @@ h3 {
   font-size: 0.7rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .battle-log-panel {
@@ -407,7 +616,7 @@ h3 {
   border-bottom: 1px solid var(--line);
   color: var(--muted);
   font-size: 0.68rem;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .battle-actions {
@@ -444,7 +653,10 @@ h3 {
   font-size: 0.74rem;
   font-weight: 800;
   text-align: center;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .battle-hone-button {
@@ -458,7 +670,10 @@ h3 {
   min-width: 0;
   display: block;
   color: inherit;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .battle-hone-button strong {
@@ -497,10 +712,12 @@ h3 {
 
 .battle-blade-body {
   min-height: 0;
+  container-type: size;
   display: grid;
   grid-template-columns: minmax(0, 0.72fr) minmax(160px, 1fr);
   align-items: center;
   gap: 8px;
+  overflow: hidden;
 }
 
 .battle-blade-card {
@@ -509,9 +726,11 @@ h3 {
 }
 
 .battle-blade-card .blade-radar {
-  width: 100%;
-  max-width: 220px;
+  width: min(100%, 220px, 100cqh);
+  height: auto;
+  max-width: min(100%, 220px);
   justify-self: center;
+  align-self: center;
 }
 
 .battle-info-button {
@@ -739,7 +958,7 @@ h3 {
   color: var(--muted);
   font-size: 0.67rem;
   line-height: 1.38;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   text-wrap: pretty;
 }
 
@@ -1236,7 +1455,7 @@ h3 {
   line-height: 1.15;
   text-align: center;
   font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
   text-wrap: balance;
 }
 
@@ -1432,7 +1651,10 @@ h3 {
   min-width: 0;
   color: var(--muted);
   font-size: 0.72rem;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .record-actions {
@@ -1449,6 +1671,7 @@ h3 {
   background: var(--panel);
   color: var(--text);
   font-size: 0.68rem;
+  white-space: nowrap;
 }
 
 .record-star {
@@ -1571,7 +1794,10 @@ h3 {
   font-size: 0.62rem;
   line-height: 1.1;
   text-align: center;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .blade-detail {
@@ -1585,7 +1811,7 @@ h3 {
   border-radius: var(--radius);
   background: var(--panel-2);
   font-size: 0.72rem;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
   overflow-y: auto;
   scrollbar-width: thin;
 }
@@ -1601,7 +1827,10 @@ h3 {
 .blade-detail-title strong,
 .blade-detail-title small {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .blade-detail-title strong {
@@ -1638,7 +1867,10 @@ h3 {
   border-radius: var(--radius);
   background: var(--panel);
   color: var(--text);
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .blade-stat-list {
@@ -1664,7 +1896,7 @@ h3 {
 .blade-detail-stat-row {
   min-width: 0;
   display: grid;
-  grid-template-columns: 3.5em minmax(0, 1fr);
+  grid-template-columns: max-content max-content;
   align-items: baseline;
   gap: 6px;
   text-align: left;
@@ -1672,13 +1904,15 @@ h3 {
 
 .blade-detail-stat-row span {
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .blade-detail-stat-row strong {
   min-width: 0;
   color: var(--text);
   font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .blade-radar {
@@ -1755,7 +1989,14 @@ h3 {
 .blade-meta-list span {
   min-width: 0;
   display: block;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+}
+
+.blade-stat-list span {
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .blade-stat-list span {
@@ -1897,7 +2138,7 @@ h3 {
 .milestone-meta,
 .milestone-count {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .milestone-copy strong {
@@ -1917,6 +2158,7 @@ h3 {
   font-size: 0.7rem;
   font-weight: 700;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .milestone-card.is-locked .milestone-count {
@@ -1967,7 +2209,10 @@ h3 {
 .stat-row span,
 .stat-row strong {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .stat-row strong {
@@ -2258,8 +2503,8 @@ button:disabled {
 .research-card small {
   display: block;
   min-width: 0;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
   text-wrap: pretty;
 }
 
@@ -2319,7 +2564,7 @@ button:disabled {
   max-width: 96px;
   min-height: 42px;
   padding: 0 8px;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
   white-space: normal;
 }
 
@@ -2399,7 +2644,7 @@ textarea::placeholder {
 .settings-message {
   min-height: 18px;
   font-size: 0.76rem;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .tab-bar {
@@ -2436,6 +2681,19 @@ textarea::placeholder {
 @media (hover: hover) {
   button:not(:disabled):hover {
     border-color: var(--text);
+  }
+}
+
+@media (max-height: 640px) {
+  .battle-blade-card .blade-detail-stats {
+    grid-template-columns: repeat(2, max-content);
+    align-content: center;
+    gap: 3px 12px;
+  }
+
+  .battle-blade-card .blade-detail-stat-row {
+    gap: 4px;
+    font-size: 0.68rem;
   }
 }
 
