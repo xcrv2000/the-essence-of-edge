@@ -2139,6 +2139,7 @@ function changeIngredient(station, action) {
     if (currentAmount >= availableAmount) {
       addLog(`${getStationName(station)}没有更多${resourceLabels[resource]}可投入。`);
       render();
+      flashResourceIndicator(resource);
       return;
     }
     nextAmount = currentAmount + Math.min(step, remainingCapacity);
@@ -2146,9 +2147,28 @@ function changeIngredient(station, action) {
     nextAmount = Math.max(0, currentAmount - step);
   }
 
+  const limitedByStorage = action === "add" && nextAmount > availableAmount;
   inputs[resource] = Math.min(availableAmount, Math.max(0, nextAmount));
   render();
+  if (limitedByStorage) {
+    flashResourceIndicator(resource);
+  }
   maybeAutoSave();
+}
+
+function flashResourceIndicator(resource) {
+  if (!resource) {
+    return;
+  }
+
+  $$(`[data-resource-indicator="${resource}"]`).forEach((element) => {
+    element.classList.remove("is-flashing");
+    void element.offsetWidth;
+    element.classList.add("is-flashing");
+    window.setTimeout(() => {
+      element.classList.remove("is-flashing");
+    }, 900);
+  });
 }
 
 function clearStationInputs(station) {
@@ -3853,8 +3873,9 @@ function renderMetalResources(container) {
       const item = document.createElement("div");
       const amount = Math.floor(Number(state.resources[resource]) || 0);
 
-      item.className = "metal-resource-item";
+      item.className = "metal-resource-item resource-indicator";
       item.classList.toggle("is-empty", amount <= 0);
+      item.dataset.resourceIndicator = resource;
 
       const label = document.createElement("span");
       label.textContent = resourceLabels[resource];
@@ -3894,7 +3915,7 @@ function renderIngredientStepControls(station) {
   }
   if (addButton) {
     addButton.textContent = `+${formatNumber(step)}`;
-    addButton.disabled = isProcessing || !selectedResource || currentAmount >= availableAmount || inputTotal >= inputLimit;
+    addButton.disabled = isProcessing || !selectedResource || inputTotal >= inputLimit;
   }
 }
 
@@ -4121,7 +4142,7 @@ function createBladeRadarChart(blade, options = {}) {
   const showLabels = options.labels !== false;
 
   const svg = createSvgElement("svg", {
-    viewBox: "0 0 160 160",
+    viewBox: showLabels ? "0 0 160 160" : "24 24 112 112",
     role: "img",
     "aria-label": "刃属性雷达图",
   });
